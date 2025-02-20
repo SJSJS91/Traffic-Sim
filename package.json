@@ -1,18 +1,26 @@
 {
-  "name": "A2",
+  "name": "traffic-sim",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SJSJS91/Traffic-Sim.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SJSJS91/Traffic-Sim/issues"
+  },
+  "homepage": "https://github.com/SJSJS91/Traffic-Sim#readme",
   "description": "",
   "dependencies": {
-    "three": "^0.168.0"
+    "three": "^0.173.0"
   },
   "devDependencies": {
-    "vite": "^5.4.2"
+    "vite": "^6.1.1"
   }
 }
