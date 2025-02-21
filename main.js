@@ -71,15 +71,50 @@ createBuilding(-15, -15, 5, 10, 5);
 createBuilding(15, -15, 5, 12, 5);
 createBuilding(-15, 15, 6, 8, 6);
 createBuilding(15, 15, 6, 14, 6);
-
+/*
 const carGeometry = new THREE.BoxGeometry(2, 1, 4);
 const carMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
 const playerCar = new THREE.Mesh(carGeometry, carMaterial);
 playerCar.position.set(0, 0.5, 0);
 scene.add(playerCar);
+*/
+
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+let playerCar;
+const loader = new GLTFLoader();
+
+loader.load( 'models/car_model/scene.gltf', function ( gltfScene ) {
+  playerCar = gltfScene.scene;
+  playerCar.position.set(0, 0.5, 0);
+  playerCar.scale.set(2, 2, 2);
+  playerCar.rotation.y = Math.PI;
+  scene.add( playerCar );
+
+}, undefined, function ( error ) {
+
+	console.error( error );
+
+} );
+
+
+function updateCamera() {
+  if (!playerCar) return;
+  // Define the fixed offset in the car's local space (Behind and Above)
+  const offset = new THREE.Vector3(0, 4, -8); // (x, height, distance behind)
+  // Create a translation matrix to apply the offset in local space
+  const translationMatrix = new THREE.Matrix4().makeTranslation(offset.x, offset.y, offset.z);
+  // Apply the translation relative to the car's world transform
+  const cameraMatrix = playerCar.matrixWorld.clone().multiply(translationMatrix);
+  // Extract the new camera position from the transformed matrix
+  const cameraPosition = new THREE.Vector3().setFromMatrixPosition(cameraMatrix);
+  // Smoothly move the camera for a natural follow effect
+  camera.position.lerp(cameraPosition, 0.1);
+  // Make the camera look at the car
+  camera.lookAt(playerCar.position);
+}
 
 let keys = {};
-
 // Detect Key Presses
 document.addEventListener("keydown", (event) => keys[event.key.toLowerCase()] = true);
 document.addEventListener("keyup", (event) => keys[event.key.toLowerCase()] = false);
@@ -90,26 +125,29 @@ let acceleration = 0.01;
 let turnSpeed = 0.03;
 
 function updatePlayerCar() {
-    if (keys["w"]) {
+    if (keys["w"] || keys["arrowup"]) {
         speed = Math.min(speed + acceleration, maxSpeed);
-    } else if (keys["s"]) {
+    } else if (keys["s"] || keys["arrowdown"]) {
         speed = Math.max(speed - acceleration, -maxSpeed / 2);
     } else {
         speed *= 0.98; // Natural deceleration
     }
 
     if (speed !== 0) {
-        if (keys["a"]) playerCar.rotation.y += turnSpeed * (speed > 0 ? 1 : -1);
-        if (keys["d"]) playerCar.rotation.y -= turnSpeed * (speed > 0 ? 1 : -1);
+        if (keys["a"] || keys["arrowleft"]) playerCar.rotation.y += turnSpeed * (speed > 0 ? 1 : -1);
+        if (keys["d"] || keys["arrowright"]) playerCar.rotation.y -= turnSpeed * (speed > 0 ? 1 : -1);
     }
 
-    playerCar.position.x -= Math.sin(playerCar.rotation.y) * speed;
-    playerCar.position.z -= Math.cos(playerCar.rotation.y) * speed;
+    playerCar.position.x += Math.sin(playerCar.rotation.y) * speed;
+    playerCar.position.z += Math.cos(playerCar.rotation.y) * speed;
 }
 
 function animate() {
   requestAnimationFrame(animate);
-  updatePlayerCar();
+  if (playerCar) {
+    updatePlayerCar();
+    updateCamera();
+  }
   renderer.render(scene, camera);
 }
 animate();
