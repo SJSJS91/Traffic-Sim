@@ -16,11 +16,11 @@
     "url": "https://github.com/SJSJS91/Traffic-Sim/issues"
   },
   "homepage": "https://github.com/SJSJS91/Traffic-Sim#readme",
-  "description": "",
   "dependencies": {
     "three": "^0.173.0"
   },
   "devDependencies": {
     "vite": "^6.1.1"
-  }
+  },
+  "description": ""
 }
