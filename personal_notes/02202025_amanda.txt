@@ -1,0 +1,2 @@
+1) thoughts on raising the sidewalk/ground or lowering the roads so that we get the lip of sidewalks we have in real life?
+	-->how does the physics of that work? how hard is it to implement traversing nonplanar map?
