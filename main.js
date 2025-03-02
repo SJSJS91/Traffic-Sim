@@ -144,6 +144,114 @@ const tunnelDepth = 1;
 createExitTunnel(15, -25, tunnelWidth, tunnelHeight, tunnelDepth);
 
 
+// Traffic Light Class
+class TrafficLight {
+    constructor(x, z, rotation, visibleDirection) {
+        this.state = 'red'; // Initial state
+        this.group = new THREE.Group();
+        this.visibleDirection = visibleDirection;
+        
+        // Pole
+        const poleGeometry = new THREE.CylinderGeometry(0.2, 0.2, 4, 32);
+        const poleMaterial = new THREE.MeshStandardMaterial({ color: 0x555555 });
+        const pole = new THREE.Mesh(poleGeometry, poleMaterial);
+        pole.position.set(0, 2, 0);
+        this.group.add(pole);
+
+        // Light Box
+        const boxGeometry = new THREE.BoxGeometry(0.75, 2, 0.5);
+        const boxMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 });
+        this.box = new THREE.Mesh(boxGeometry, boxMaterial);
+        this.box.position.set(0, 3.5, 0.3);
+        this.group.add(this.box);
+
+        // Lights
+        this.lights = {};
+        const colors = ['red', 'yellow', 'green'];
+        colors.forEach((color, index) => {
+            const lightGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+            const lightMaterial = new THREE.MeshStandardMaterial({ emissive: color });
+            const light = new THREE.Mesh(lightGeometry, lightMaterial);
+            light.position.set(0, 4.2 - index * 0.6, 0.5);
+            this.group.add(light);
+            this.lights[color] = light;
+        });
+        
+        this.group.position.set(x, 0, z);
+        this.group.rotation.y = rotation;
+        
+        this.updateLights();
+
+        this.boundingBox = new THREE.Box3().setFromObject(this.group);
+    }
+
+    updateLights() {
+        Object.keys(this.lights).forEach(color => {
+            this.lights[color].material.emissiveIntensity = (color === this.state) ? 1 : 0.1;
+            this.lights[color].visible = (color === this.state && this.visibleDirection);
+        });
+    }
+
+    setState(newState) {
+        this.state = newState;
+        this.updateLights();
+    }
+
+    updateBoundingBox() {
+        this.boundingBox.setFromObject(this.group);
+    }
+}
+
+// Create Traffic Lights at Two 4-Way Intersections
+const trafficLights = [];
+trafficLights.push(new TrafficLight(-8.5, -3.5, Math.PI / 2, true)); // Intersection 1
+trafficLights.push(new TrafficLight(-1.5, 3.5, -Math.PI / 2, true));
+trafficLights.push(new TrafficLight(-8.5, 3.5, -Math.PI, true));
+trafficLights.push(new TrafficLight(-1.5, -3.5, 0, true));
+trafficLights.push(new TrafficLight(11.5, -3.5, Math.PI / 2, true)); // Intersection 2
+trafficLights.push(new TrafficLight(18.5, 3.5, -Math.PI / 2, true));
+trafficLights.push(new TrafficLight(18.5, -3.5, 0, true));
+trafficLights.push(new TrafficLight(11.5, 3.5, Math.PI, true));
+
+trafficLights.forEach(light => scene.add(light.group));
+
+// Traffic Light Cycle
+let timeElapsed = 0;
+function updateTrafficLights(deltaTime) {
+    timeElapsed += deltaTime;
+    let cycleTime = timeElapsed % 14;
+
+    if (cycleTime < 5) {
+        trafficLights[0].setState('green');
+        trafficLights[1].setState('green');
+        trafficLights[2].setState('red');
+        trafficLights[3].setState('red');
+        trafficLights[4].setState('green');
+        trafficLights[5].setState('green');
+        trafficLights[6].setState('red');
+        trafficLights[7].setState('red');
+    } else if (cycleTime < 7) {
+        trafficLights[0].setState('yellow');
+        trafficLights[1].setState('yellow');
+        trafficLights[4].setState('yellow');
+        trafficLights[5].setState('yellow');
+    } else if (cycleTime < 12) {
+        trafficLights[0].setState('red');
+        trafficLights[1].setState('red');
+        trafficLights[2].setState('green');
+        trafficLights[3].setState('green');
+        trafficLights[4].setState('red');
+        trafficLights[5].setState('red');
+        trafficLights[6].setState('green');
+        trafficLights[7].setState('green');
+    } else {
+        trafficLights[2].setState('yellow');
+        trafficLights[3].setState('yellow');
+        trafficLights[6].setState('yellow');
+        trafficLights[7].setState('yellow');
+    }
+}
+
 // Create Player Car
 /*const carGeometry = new THREE.BoxGeometry(2, 1, 4);
 const carMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
@@ -205,6 +313,13 @@ function checkCollision(newX, newZ) {
             return true;
         }
     }
+    for (let light of trafficLights) {
+        light.updateBoundingBox(); // Update bounding box before checking collision
+        const carBox = new THREE.Box3().setFromObject(playerCar);
+        if (carBox.intersectsBox(light.boundingBox)) {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -233,12 +348,20 @@ function updatePlayerCar() {
     }
 }
 
+let lastTime = performance.now();
 function animate() {
     requestAnimationFrame(animate);
+
+    let now = performance.now();
+    let deltaTime = (now - lastTime) / 1000;
+    lastTime = now;
+
     if (playerCar) {
       updatePlayerCar();
       updateCamera();
     }
+
+    updateTrafficLights(deltaTime);
     renderer.render(scene, camera);
   }
   animate();
