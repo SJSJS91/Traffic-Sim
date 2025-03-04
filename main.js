@@ -9,7 +9,7 @@ document.body.appendChild(renderer.domElement);
 
 // Set Camera Position
 camera.position.set(0, 10, 20);
-// camera.position.set(0, 150, 10);
+camera.position.set(0, 150, 10);
 camera.lookAt(0, 0, 0);
 
 // Lighting
@@ -134,22 +134,39 @@ function createExitTunnel(x, z, width, height, depth) {
     tunnel.position.set(x, height / 2, z); // Position it at the right spot on the top wall
     scene.add(tunnel);
 
-    // const archGeometry = new THREE.CircleGeometry(width / 2, 32, 0, Math.PI); //half-circle
-    // const archMaterial = new THREE.MeshStandardMaterial({ color: 'green' }); 
-    // const arch = new THREE.Mesh(archGeometry, archMaterial);
-
-    // arch.position.set(0, 0, 0); // Position it directly above the tunnel (height + some offset)
-    // arch.rotation.x = Math.PI/2; // Rotate the arch to face downwards
-    // scene.add(arch);
+}
+function createSideExitTunnel(x, z, width, height, depth) {
+    const tunnelGeometry = new THREE.BoxGeometry(width, height, depth);
+    const tunnelMaterial = new THREE.MeshStandardMaterial({ color: 'black' });
+  
+    const tunnel = new THREE.Mesh(tunnelGeometry, tunnelMaterial);
+    tunnel.position.set(x, height / 2, z); // Position it at the right spot on the top wall
+    tunnel.rotation.y = Math.PI / 2;
+    scene.add(tunnel);
 
 }
 
 
-//FOR DEMO: exit tunnel at the end of the rightmost road on the top wall --> actual product will randomize exit loc
-const tunnelWidth = 6;   //same as the road width
-const tunnelHeight = 5;
-const tunnelDepth = 1;
-createExitTunnel(15, -100, tunnelWidth, tunnelHeight, tunnelDepth);
+let index = Math.floor(Math.random() * 4);  // Math.random() * 4 gives a range from 0 to 4 (4 excluded), Math.floor() rounds it to an integer
+let random_var = Math.random() * 180 - 90;
+
+switch (index) {
+    case 0:
+        createExitTunnel(random_var, 100, tunnelWidth, tunnelHeight, tunnelDepth);
+        break;
+    case 1:
+        createExitTunnel(random_var, -100, tunnelWidth, tunnelHeight, tunnelDepth);
+        break;
+    case 2:
+        createSideExitTunnel(100, random_var, tunnelWidth, tunnelHeight, tunnelDepth);
+        break;
+    case 3:
+        createSideExitTunnel(-100, random_var, tunnelWidth, tunnelHeight, tunnelDepth);
+        break;
+    default:
+        console.log("Unexpected index value");
+}
+
 
 
 // Traffic Light Class
@@ -366,7 +383,7 @@ function animate() {
 
     if (playerCar) {
       updatePlayerCar();
-      updateCamera();
+    //   updateCamera();
     }
 
     updateTrafficLights(deltaTime);
