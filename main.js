@@ -29,7 +29,7 @@ skySphere.position.set(0, 0, 0);
 scene.add(skySphere);
 
 // Create Ground (City Base) - changed this to just be the sidewalk for now
-const groundGeometry = new THREE.PlaneGeometry(50, 50);
+const groundGeometry = new THREE.PlaneGeometry(200, 200);
 // const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x777777 });
 
 const groundTexture = new THREE.TextureLoader().load('assets/sidewalk4.jpeg');
@@ -40,7 +40,7 @@ ground.rotation.x = -Math.PI / 2;
 scene.add(ground);
 
 // Create Roads
-function createRoad(x, z, width, height) {
+function createRoad(x, z, y, width, height) {
     const roadGeometry = new THREE.PlaneGeometry(width, height);
 
     //const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
@@ -48,37 +48,19 @@ function createRoad(x, z, width, height) {
     const roadMaterial = new THREE.MeshStandardMaterial({ map: roadTexture });
 
     const road = new THREE.Mesh(roadGeometry, roadMaterial);
-    road.position.set(x, 0.01, z);
+    road.position.set(x, y, z);
     road.rotation.x = -Math.PI / 2;
     scene.add(road);
 }
 
-// Create main roads
-createRoad(0, 0, 50, 6); // Horizontal road
-// createRoad(0, 10, 50, 6); // Parallel horizontal road
-// createRoad(0, -10, 50, 6); // Another road
-createRoad(-5, 0, 6, 50); // Vertical road
-createRoad(15, 0, 6, 50); // Another vertical road
+createRoad(0, 0, 0.2, 200, 10); // Horizontal road (across entire city)
+createRoad(0, -50, 0.2, 200, 10); // Horizontal road
+createRoad(0, 70, 0.2, 200, 10); // Horizontal road
 
-
-// // Create Sidewalks
-// function createSidewalk(x, z, width, height) {
-//     const sidewalkGeometry = new THREE.PlaneGeometry(width, height);
-//     const sidewalkMaterial = new THREE.MeshStandardMaterial({ color: 0xAAAAAA });
-//     const sidewalk = new THREE.Mesh(sidewalkGeometry, sidewalkMaterial);
-//     sidewalk.position.set(x, 0.02, z);
-//     sidewalk.rotation.x = -Math.PI / 2;
-//     scene.add(sidewalk);
-// }
-
-// // Place sidewalks beside roads
-// createSidewalk(0, 3, 50, 2);
-// createSidewalk(0, -3, 50, 2);
-// createSidewalk(0, 13, 50, 2);
-// createSidewalk(0, -13, 50, 2);
-// createSidewalk(-13, 0, 2, 50);
-// createSidewalk(13, 0, 2, 50);
-
+createRoad(-50, 0, 0.1, 10, 200,); // Vertical road
+createRoad(50, 0, 0.1,10, 200, ); // Vertical road
+createRoad(80, 0, 0.1, 10, 200, ); // Vertical road (across entire city)
+createRoad(0, 0, 0.1, 10, 200, ); // Vertical road (centered)
 
 // Create Buildings
 const buildings = [];
@@ -95,12 +77,19 @@ function createBuilding(x, z, width, height, depth) {
 
 }
 
+// Create 5 horizontal roads
+createRoad(0, 0, 200, 10); // Horizontal road (across entire city)
+// createRoad(0, 50, 200, 10); // Horizontal road
+createRoad(0, -50, 200, 10); // Horizontal road
+createRoad(0, 70, 200, 10); // Horizontal road
+// createRoad(0, -85, 200, 10); // Horizontal road
 
-// Place buildings along the city blocks
-createBuilding(-15, -12, 8, 10, 8);
-createBuilding(21, -15, 5, 12, 5);
-createBuilding(4, 7, 6, 8, 6);
-// createBuilding(15, 15, 6, 14, 6);
+// Create 5 vertical roads
+createRoad(-50, 0, 10, 200,); // Vertical road
+createRoad(50, 0, 10, 200, ); // Vertical road
+// createRoad(-85, 0, 10, 200,); // Vertical road (across entire city)
+createRoad(80, 0, 10, 200, ); // Vertical road (across entire city)
+createRoad(0, 0, 10, 200, ); // Vertical road (centered)
 
 
 // Create Boundary Walls
@@ -120,12 +109,13 @@ function createWall(x, z, width, height, depth) {
 const wallHeight = 10;  
 
   const wallDepth = 1;    
-  const citySize = 52; //for the intermediate demo, our city is 50x50
+  const citySize = 200; //for the intermediate demo, our city is 50x50 --> now 200x200
   
-  createWall(0, 25.5, citySize, wallHeight, wallDepth); //bottom
-  createWall(0, -25.5, citySize, wallHeight, wallDepth); //top
-  createWall(-25.5, 0, wallDepth, wallHeight, citySize); //left
-  createWall(25.5, 0, wallDepth, wallHeight, citySize); //right
+  createWall(0, 100.5, citySize, wallHeight, wallDepth); //bottom
+  createWall(0, -100.5, citySize, wallHeight, wallDepth); //top
+  createWall(-100.5, 0, wallDepth, wallHeight, citySize); //left
+  createWall(100.5, 0, wallDepth, wallHeight, citySize); //right
+
 
 
 
@@ -153,7 +143,7 @@ function createExitTunnel(x, z, width, height, depth) {
 const tunnelWidth = 6;   //same as the road width
 const tunnelHeight = 5;
 const tunnelDepth = 1;
-createExitTunnel(15, -25, tunnelWidth, tunnelHeight, tunnelDepth);
+createExitTunnel(15, -100, tunnelWidth, tunnelHeight, tunnelDepth);
 
 
 // Traffic Light Class
