@@ -9,6 +9,7 @@ document.body.appendChild(renderer.domElement);
 
 // Set Camera Position
 camera.position.set(0, 10, 20);
+// camera.position.set(0, 150, 10);
 camera.lookAt(0, 0, 0);
 
 // Lighting
@@ -77,19 +78,24 @@ function createBuilding(x, z, width, height, depth) {
 
 }
 
-// Create 5 horizontal roads
-createRoad(0, 0, 200, 10); // Horizontal road (across entire city)
-// createRoad(0, 50, 200, 10); // Horizontal road
-createRoad(0, -50, 200, 10); // Horizontal road
-createRoad(0, 70, 200, 10); // Horizontal road
-// createRoad(0, -85, 200, 10); // Horizontal road
+const blocks = [
+    { x: -72.5, z: -72.5, width: 30, depth:30 },
+    { x: -72.5, z: -25, width: 30, depth:30 },
+    { x: -72.5, z: 35, width: 30, depth:50 },
 
-// Create 5 vertical roads
-createRoad(-50, 0, 10, 200,); // Vertical road
-createRoad(50, 0, 10, 200, ); // Vertical road
-// createRoad(-85, 0, 10, 200,); // Vertical road (across entire city)
-createRoad(80, 0, 10, 200, ); // Vertical road (across entire city)
-createRoad(0, 0, 10, 200, ); // Vertical road (centered)
+    { x: -22.5, z: -72.5, width: 30, depth:30 },
+    { x: -22.5, z: -25, width: 30, depth:30 },
+    { x: -22.5, z: 35, width: 30, depth:50 },
+
+    { x: 22.5, z: -72.5, width: 30, depth:30 },
+    { x: 22.5, z: -25, width: 30, depth:30 },
+    { x: 22.5, z: 35, width: 30, depth:50 },
+];
+
+// Create buildings on each block
+blocks.forEach(block => {
+    createBuilding(block.x, block.z, block.width, 12, block.depth); // Building size 10x12x10
+});
 
 
 // Create Boundary Walls
