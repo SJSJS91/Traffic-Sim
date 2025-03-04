@@ -8,7 +8,9 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // Set Camera Position
+//amanda birds eye view:
 camera.position.set(0, 10, 20);
+camera.position.set(0, 200, 0);
 camera.lookAt(0, 0, 0);
 
 // Lighting
@@ -16,8 +18,22 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(10, 20, 10);
 scene.add(light);
 
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Adjust intensity as needed
+scene.add(ambientLight);
+
+
+const skyGeometry = new THREE.SphereGeometry(500, 32, 32);
+const skyTexture = new THREE.TextureLoader().load('assets/day.jpeg');
+const skyMaterial = new THREE.MeshBasicMaterial({ map: skyTexture, side: THREE.BackSide });
+//if toggle night, make the skyTexture a night texture
+const skySphere = new THREE.Mesh(skyGeometry, skyMaterial);
+skySphere.position.set(0, 0, 0);
+scene.add(skySphere);
+
+
+
 // Create Ground (City Base) - changed this to just be the sidewalk for now
-const groundGeometry = new THREE.PlaneGeometry(50, 50);
+const groundGeometry = new THREE.PlaneGeometry(200, 200);
 // const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x777777 });
 
 const groundTexture = new THREE.TextureLoader().load('assets/sidewalk4.jpeg');
@@ -41,35 +57,25 @@ function createRoad(x, z, width, height) {
     scene.add(road);
 }
 
-// Create main roads
-createRoad(0, 0, 50, 6); // Horizontal road
-// createRoad(0, 10, 50, 6); // Parallel horizontal road
-// createRoad(0, -10, 50, 6); // Another road
-createRoad(-5, 0, 6, 50); // Vertical road
-createRoad(15, 0, 6, 50); // Another vertical road
+// Create 5 horizontal roads
+createRoad(0, 0, 200, 10); // Horizontal road (across entire city)
+// createRoad(0, 50, 200, 10); // Horizontal road
+createRoad(0, -50, 200, 10); // Horizontal road
+createRoad(0, 70, 200, 10); // Horizontal road
+// createRoad(0, -85, 200, 10); // Horizontal road
+
+// Create 5 vertical roads
+createRoad(-50, 0, 10, 200,); // Vertical road
+createRoad(50, 0, 10, 200, ); // Vertical road
+// createRoad(-85, 0, 10, 200,); // Vertical road (across entire city)
+createRoad(80, 0, 10, 200, ); // Vertical road (across entire city)
+createRoad(0, 0, 10, 200, ); // Vertical road (centered)
 
 
-// // Create Sidewalks
-// function createSidewalk(x, z, width, height) {
-//     const sidewalkGeometry = new THREE.PlaneGeometry(width, height);
-//     const sidewalkMaterial = new THREE.MeshStandardMaterial({ color: 0xAAAAAA });
-//     const sidewalk = new THREE.Mesh(sidewalkGeometry, sidewalkMaterial);
-//     sidewalk.position.set(x, 0.02, z);
-//     sidewalk.rotation.x = -Math.PI / 2;
-//     scene.add(sidewalk);
-// }
-
-// // Place sidewalks beside roads
-// createSidewalk(0, 3, 50, 2);
-// createSidewalk(0, -3, 50, 2);
-// createSidewalk(0, 13, 50, 2);
-// createSidewalk(0, -13, 50, 2);
-// createSidewalk(-13, 0, 2, 50);
-// createSidewalk(13, 0, 2, 50);
 
 
 // Create Buildings
-const buildings = [];
+// const buildings = [];
 function createBuilding(x, z, width, height, depth) {
 
     const buildingGeometry = new THREE.BoxGeometry(width, height, depth);
@@ -84,11 +90,84 @@ function createBuilding(x, z, width, height, depth) {
 }
 
 
-// Place buildings along the city blocks
-createBuilding(-15, -12, 8, 10, 8);
-createBuilding(21, -15, 5, 12, 5);
-createBuilding(4, 7, 6, 8, 6);
-// createBuilding(15, 15, 6, 14, 6);
+// const buildings = [
+//     { x: -75, z: 80, width: 8, height: 12, depth: 8 },
+//     // { x: -50, z: 85, width: 10, height: 15, depth: 10 },
+//     { x: -90, z: 40, width: 12, height: 18, depth: 12 },
+//     { x: -65, z: -60, width: 8, height: 10, depth: 8 },
+//     { x: -30, z: -80, width: 10, height: 14, depth: 10 },
+//     { x: 60, z: 40, width: 12, height: 18, depth: 12 },
+//     { x: 90, z: 30, width: 14, height: 20, depth: 14 },
+//     { x: -20, z: 60, width: 8, height: 16, depth: 8 },
+//     { x: 70, z: -20, width: 12, height: 14, depth: 12 },
+//     { x: -60, z: 20, width: 9, height: 12, depth: 9 },
+//     // { x: 50, z: -90, width: 10, height: 15, depth: 10 },
+//     // { x: 80, z: -70, width: 14, height: 18, depth: 14 },
+//     { x: -40, z: 80, width: 10, height: 12, depth: 10 },
+//     { x: -80, z: -20, width: 12, height: 14, depth: 12 },
+//     { x: -10, z: 50, width: 8, height: 12, depth: 8 },
+//     // { x: 20, z: 70, width: 14, height: 16, depth: 14 },
+//     { x: -20, z: -40, width: 10, height: 14, depth: 10 },
+//     // { x: 0, z: 0, width: 9, height: 12, depth: 9 },
+//     { x: 60, z: 10, width: 12, height: 16, depth: 12 },
+//     // { x: -50, z: -90, width: 15, height: 20, depth: 15 },
+//     { x: 70, z: 50, width: 10, height: 15, depth: 10 },
+//     { x: -80, z: 50, width: 14, height: 18, depth: 14 },
+//     { x: 30, z: -60, width: 8, height: 10, depth: 8 },
+//     { x: 40, z: 90, width: 10, height: 12, depth: 10 },
+//     { x: 70, z: 20, width: 15, height: 20, depth: 15 },
+//     { x: -70, z: -10, width: 10, height: 12, depth: 10 },
+//     // { x: -50, z: 10, width: 12, height: 16, depth: 12 },
+//     { x: -80, z: -90, width: 9, height: 12, depth: 9 },
+//     { x: 40, z: -80, width: 14, height: 18, depth: 14 },
+//     { x: 60, z: -10, width: 10, height: 12, depth: 10 },
+//     // { x: 80, z: 70, width: 12, height: 16, depth: 12 },
+//     { x: -60, z: -80, width: 10, height: 12, depth: 10 },
+//     { x: 30, z: 10, width: 12, height: 14, depth: 12 },
+//     { x: -10, z: 10, width: 15, height: 20, depth: 15 },
+//     // { x: 50, z: 50, width: 8, height: 10, depth: 8 },
+//     { x: -90, z: 30, width: 10, height: 14, depth: 10 },
+//     { x: 70, z: 60, width: 9, height: 12, depth: 9 },
+//     { x: -30, z: 90, width: 10, height: 16, depth: 10 },
+//     { x: 10, z: -30, width: 14, height: 18, depth: 14 },
+//     { x: 20, z: -70, width: 10, height: 12, depth: 10 },
+//     // { x: -50, z: 50, width: 12, height: 14, depth: 12 },
+//     { x: -70, z: 40, width: 12, height: 16, depth: 12 },
+//     { x: -90, z: -60, width: 10, height: 12, depth: 10 },
+//     // { x: 50, z: -50, width: 8, height: 12, depth: 8 },
+//     { x: -20, z: -30, width: 14, height: 18, depth: 14 },
+//     { x: 70, z: 80, width: 10, height: 12, depth: 10 },
+//     // { x: 80, z: 30, width: 12, height: 16, depth: 12 },
+//     { x: 40, z: -40, width: 9, height: 12, depth: 9 },
+//     { x: -40, z: -40, width: 12, height: 16, depth: 12 },
+//     { x: 60, z: -40, width: 8, height: 10, depth: 8 },
+//     { x: -10, z: 90, width: 14, height: 18, depth: 14 },
+//     // { x: 50, z: 20, width: 10, height: 12, depth: 10 },
+//     // { x: -30, z: 70, width: 12, height: 14, depth: 12 },
+//     { x: -70, z: 20, width: 9, height: 12, depth: 9 },
+//     { x: -80, z: -30, width: 12, height: 14, depth: 12 },
+//     { x: 90, z: -80, width: 8, height: 12, depth: 8 },
+//     // { x: -50, z: 30, width: 10, height: 12, depth: 10 },
+//     { x: -80, z: 80, width: 8, height: 10, depth: 8 },
+//     { x: 10, z: -20, width: 12, height: 14, depth: 12 },
+//     // { x: -40, z: 0, width: 10, height: 12, depth: 10 },
+//     { x: -60, z: 60, width: 9, height: 12, depth: 9 },
+//     { x: -10, z: 80, width: 10, height: 12, depth: 10 },
+//     // { x: 70, z: 70, width: 12, height: 14, depth: 12 },
+//     { x: -30, z: -80, width: 10, height: 14, depth: 10 },
+//     { x: -80, z: -40, width: 12, height: 16, depth: 12 },
+//     // { x: 80, z: -40, width: 10, height: 12, depth: 10 },
+//     { x: -10, z: 50, width: 14, height: 18, depth: 14 },
+//     { x: 40, z: 40, width: 12, height: 14, depth: 12 },
+//     { x: -60, z: -30, width: 8, height: 10, depth: 8 },
+//     // { x: 70, z: 0, width: 10, height: 12, depth: 10 }
+// ];
+
+// // // Place all buildings
+// // buildings.forEach(building => {
+// //     createBuilding(building.x, building.z, building.width, building.height, building.depth);
+// // });
+
 
 
 // Create Boundary Walls
@@ -97,7 +176,7 @@ const walls = [];
 function createWall(x, z, width, height, depth) {
     const wallGeometry = new THREE.BoxGeometry(width, height, depth); 
     const wallTexture = new THREE.TextureLoader().load('assets/wood.jpg');
-    const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture }); 
+    const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture, side:THREE.DoubleSide }); 
     const wall = new THREE.Mesh(wallGeometry, wallMaterial);
     wall.position.set(x, height / 2, z); // Set position
     scene.add(wall);
@@ -108,12 +187,12 @@ function createWall(x, z, width, height, depth) {
 const wallHeight = 10;  
 
   const wallDepth = 1;    
-  const citySize = 52; //for the intermediate demo, our city is 50x50
+  const citySize = 200; //for the intermediate demo, our city is 50x50 --> now 200x200
   
-  createWall(0, 25.5, citySize, wallHeight, wallDepth); //bottom
-  createWall(0, -25.5, citySize, wallHeight, wallDepth); //top
-  createWall(-25.5, 0, wallDepth, wallHeight, citySize); //left
-  createWall(25.5, 0, wallDepth, wallHeight, citySize); //right
+  createWall(0, 100.5, citySize, wallHeight, wallDepth); //bottom
+  createWall(0, -100.5, citySize, wallHeight, wallDepth); //top
+  createWall(-100.5, 0, wallDepth, wallHeight, citySize); //left
+  createWall(100.5, 0, wallDepth, wallHeight, citySize); //right
 
 
 
@@ -141,7 +220,7 @@ function createExitTunnel(x, z, width, height, depth) {
 const tunnelWidth = 6;   //same as the road width
 const tunnelHeight = 5;
 const tunnelDepth = 1;
-createExitTunnel(15, -25, tunnelWidth, tunnelHeight, tunnelDepth);
+createExitTunnel(15, -100, tunnelWidth, tunnelHeight, tunnelDepth);
 
 
 // Create Player Car
@@ -237,7 +316,7 @@ function animate() {
     requestAnimationFrame(animate);
     if (playerCar) {
       updatePlayerCar();
-      updateCamera();
+    //   updateCamera();
     }
     renderer.render(scene, camera);
   }
