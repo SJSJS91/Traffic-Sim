@@ -146,7 +146,9 @@ function createSideExitTunnel(x, z, width, height, depth) {
 
 }
 
-
+const tunnelWidth = 6; 
+const tunnelHeight = 5;
+const tunnelDepth = 1;
 let index = Math.floor(Math.random() * 4);  // Math.random() * 4 gives a range from 0 to 4 (4 excluded), Math.floor() rounds it to an integer
 let random_var = Math.random() * 180 - 90;
 
@@ -169,7 +171,7 @@ switch (index) {
 
 
 
-// Traffic Light Class
+// Traffic Light Class 
 class TrafficLight {
     constructor(x, z, rotation, visibleDirection) {
         this.state = 'red'; // Initial state
