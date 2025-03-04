@@ -16,6 +16,18 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(10, 20, 10);
 scene.add(light);
 
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Adjust intensity as needed
+scene.add(ambientLight);
+
+
+const skyGeometry = new THREE.SphereGeometry(500, 32, 32);
+const skyTexture = new THREE.TextureLoader().load('assets/day.jpeg');
+const skyMaterial = new THREE.MeshBasicMaterial({ map: skyTexture, side: THREE.BackSide });
+//if toggle night, make the skyTexture a night texture
+const skySphere = new THREE.Mesh(skyGeometry, skyMaterial);
+skySphere.position.set(0, 0, 0);
+scene.add(skySphere);
+
 // Create Ground (City Base) - changed this to just be the sidewalk for now
 const groundGeometry = new THREE.PlaneGeometry(50, 50);
 // const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x777777 });
