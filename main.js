@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // Setup Scene, Camera, and Renderer
 const scene = new THREE.Scene();
@@ -9,7 +10,7 @@ document.body.appendChild(renderer.domElement);
 
 // Set Camera Position
 camera.position.set(0, 10, 20);
-camera.position.set(0, 150, 10);
+// camera.position.set(0, 150, 0);
 camera.lookAt(0, 0, 0);
 
 // Lighting
@@ -31,7 +32,6 @@ scene.add(skySphere);
 
 // Create Ground (City Base) - changed this to just be the sidewalk for now
 const groundGeometry = new THREE.PlaneGeometry(200, 200);
-// const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x777777 });
 
 const groundTexture = new THREE.TextureLoader().load('assets/sidewalk4.jpeg');
 const groundMaterial = new THREE.MeshStandardMaterial({ map: groundTexture });
@@ -52,16 +52,17 @@ function createRoad(x, z, y, width, height) {
     road.position.set(x, y, z);
     road.rotation.x = -Math.PI / 2;
     scene.add(road);
+    return road;
 }
 
-createRoad(0, 0, 0.2, 200, 10); // Horizontal road (across entire city)
-createRoad(0, -50, 0.2, 200, 10); // Horizontal road
-createRoad(0, 70, 0.2, 200, 10); // Horizontal road
+createRoad(0, 0, 0.2, 200, 20); // Horizontal road 
+createRoad(0, -60, 0.2, 200, 20); // Horizontal road
+createRoad(0, 60, 0.2, 200, 20); // Horizontal road
 
-createRoad(-50, 0, 0.1, 10, 200,); // Vertical road
-createRoad(50, 0, 0.1,10, 200, ); // Vertical road
-createRoad(80, 0, 0.1, 10, 200, ); // Vertical road (across entire city)
-createRoad(0, 0, 0.1, 10, 200, ); // Vertical road (centered)
+createRoad(-5, 0, 0.1, 20, 200,); // Vertical road
+const shortRoad = createRoad(50, 0, 0.1, 20, 170,); // Vertical road
+shortRoad.position.z -= 15;
+
 
 // Create Buildings
 const buildings = [];
@@ -73,29 +74,141 @@ function createBuilding(x, z, width, height, depth) {
     // const buildingMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
     const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
     building.position.set(x, height / 2, z);
-    scene.add(building);
+    // scene.add(building);
     buildings.push(building);
 
 }
 
-const blocks = [
-    { x: -72.5, z: -72.5, width: 30, depth:30 },
-    { x: -72.5, z: -25, width: 30, depth:30 },
-    { x: -72.5, z: 35, width: 30, depth:50 },
+const buildingLoader = new GLTFLoader();
+function loadOfficeBuilding(position) {
+    buildingLoader.load(
+        'models/simple_office_building_1.glb',
+        function (gltf) {
+            const office = gltf.scene;
+            office.scale.set(1.75, position.scale, 4.5);  // Apply scaling to all axes
+            office.position.set(position.x, position.y, position.z);
+            
+            // Apply rotation based on the provided rotationY value
+            office.rotation.y = position.rotationY;
 
-    { x: -22.5, z: -72.5, width: 30, depth:30 },
-    { x: -22.5, z: -25, width: 30, depth:30 },
-    { x: -22.5, z: 35, width: 30, depth:50 },
+            scene.add(office);
+            console.log("Office model loaded at:", position);
+        },
+        undefined,
+        function (error) {
+            console.error("Error loading model:", error);
+        }
+    );
+}
+const pos = {x: 40, y: 0, z: 79, rotationY: Math.PI/2, scale: 3};
+loadOfficeBuilding(pos);
 
-    { x: 22.5, z: -72.5, width: 30, depth:30 },
-    { x: 22.5, z: -25, width: 30, depth:30 },
-    { x: 22.5, z: 35, width: 30, depth:50 },
-];
+function loadBrownBuilding(position) {
+    buildingLoader.load(
+        'models/game_ready_city_buildings.glb',
+        function (gltf) {
+            const office = gltf.scene;
+            office.scale.set(position.scale, position.scale, position.scale); 
+            office.position.set(position.x, position.y, position.z);
+            office.rotation.y = position.rotationY;
+            scene.add(office);
+            console.log("Office model loaded at:", position);
+        },
+        undefined,
+        function (error) {
+            console.error("Error loading model:", error);
+        }
+    );
+}
+const brownBpos = {x: 85, y: 0, z: -11, rotationY: 0, scale: 12};
+loadBrownBuilding(brownBpos);
 
-// Create buildings on each block
-blocks.forEach(block => {
-    createBuilding(block.x, block.z, block.width, 12, block.depth); // Building size 10x12x10
-});
+function loadChicBuilding(position) {
+    buildingLoader.load(
+        'models/realistic_chicago_buildings.glb',
+        function (gltf) {
+            const office = gltf.scene;
+            office.scale.set(2*position.scale, position.scale, position.scale); 
+            office.position.set(position.x, position.y, position.z);
+            office.rotation.y = position.rotationY;
+            scene.add(office);
+            console.log("Office model loaded at:", position);
+        },
+        undefined,
+        function (error) {
+            console.error("Error loading model:", error);
+        }
+    );
+}
+const chicagopos = {x: -70, y: 0, z: 40, rotationY: 0, scale: .2};
+loadChicBuilding(chicagopos);
+
+function load3Building(position) {
+    buildingLoader.load(
+        'models/3_buildings_-_ww2_carentan_inspired.glb',
+        function (gltf) {
+            const office = gltf.scene;
+            office.scale.set(position.scale, position.scale, position.scale);  
+            office.position.set(position.x, position.y, position.z);
+            office.rotation.y = position.rotationY;
+            scene.add(office);
+            console.log("Office model loaded at:", position);
+        },
+        undefined,
+        function (error) {
+            console.error("Error loading model:", error);
+        }
+    );
+}
+const building3pos = {x: 33, y: 0, z: 30, rotationY: Math.PI/2, scale: .01};
+load3Building(building3pos);
+const building3pos2 = {x: 10, y: 0, z: 28, rotationY: -Math.PI/2, scale: .01};
+load3Building(building3pos2);
+const building3pos3 = {x: 33, y: 0, z: -28, rotationY: Math.PI/2, scale: .01};
+load3Building(building3pos3);
+const building3pos4 = {x: 10, y: 0, z: -30, rotationY: -Math.PI/2, scale: .01};
+load3Building(building3pos4);
+
+function loadWhiteB(position) {
+    buildingLoader.load(
+        'models/low-poly_building.glb',
+        function (gltf) {
+            const office = gltf.scene;
+            office.scale.set(2*position.scale, position.scale, position.scale); 
+            office.position.set(position.x, position.y, position.z);
+            office.rotation.y = position.rotationY;
+            scene.add(office);
+            console.log("Office model loaded at:", position);
+        },
+        undefined,
+        function (error) {
+            console.error("Error loading model:", error);
+        }
+    );
+}
+const buildingWhitepos = {x: -54, y: 0, z: -82, rotationY: Math.PI, scale: 100};
+loadWhiteB(buildingWhitepos);
+
+
+function loadExpensiveOfficeBuilding(position) {
+    buildingLoader.load(
+        'models/office_building.glb',
+        function (gltf) {
+            const office = gltf.scene;
+            office.scale.set(position.scale, position.scale, position.scale); 
+            office.position.set(position.x, position.y, position.z);
+            office.rotation.y = position.rotationY;
+            scene.add(office);
+            console.log("Office model loaded at:", position);
+        },
+        undefined,
+        function (error) {
+            console.error("Error loading model:", error);
+        }
+    );
+}
+const expPos = {x: -60, y: 20, z: 75, rotationY: 0, scale: .22};
+loadExpensiveOfficeBuilding(expPos);
 
 
 // Create Boundary Walls
@@ -200,7 +313,7 @@ class TrafficLight {
             const lightMaterial = new THREE.MeshStandardMaterial({ emissive: color });
             const light = new THREE.Mesh(lightGeometry, lightMaterial);
             light.position.set(0, 4.2 - index * 0.6, 0.5);
-            this.group.add(light);
+            // this.group.add(light);
             this.lights[color] = light;
         });
         
@@ -240,7 +353,7 @@ trafficLights.push(new TrafficLight(18.5, 3.5, -Math.PI / 2, true));
 trafficLights.push(new TrafficLight(18.5, -3.5, 0, true));
 trafficLights.push(new TrafficLight(11.5, 3.5, Math.PI, true));
 
-trafficLights.forEach(light => scene.add(light.group));
+// trafficLights.forEach(light => scene.add(light.group));
 
 // Traffic Light Cycle
 let timeElapsed = 0;
@@ -285,9 +398,6 @@ const carMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
 const playerCar = new THREE.Mesh(carGeometry, carMaterial);*/
 const startPosition = { x: 0, y: 0.5, z: 0 };
 //playerCar.position.set(startPosition.x, startPosition.y, startPosition.z);
-//scene.add(playerCar);
-
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 let playerCar;
 const loader = new GLTFLoader();
@@ -385,7 +495,7 @@ function animate() {
 
     if (playerCar) {
       updatePlayerCar();
-    //   updateCamera();
+      updateCamera();
     }
 
     updateTrafficLights(deltaTime);
