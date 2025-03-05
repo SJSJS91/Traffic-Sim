@@ -65,17 +65,15 @@ const shortRoad = createRoad(50, 0, 0.1, 20, 170,); // Vertical road
 shortRoad.position.z -= 15;
 
 
-// Create Buildings
+// Create Buildings -- this is only here because collision detection uses this fn
 const buildings = [];
 function createBuilding(x, z, width, height, depth) {
 
     const buildingGeometry = new THREE.BoxGeometry(width, height, depth);
     const buildingTexture = new THREE.TextureLoader().load('assets/bldng3.JPG');
     const buildingMaterial = new THREE.MeshStandardMaterial({ map: buildingTexture });
-    // const buildingMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
     const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
     building.position.set(x, height / 2, z);
-    // scene.add(building);
     buildings.push(building);
 
 }
@@ -129,7 +127,7 @@ function loadChicBuilding(position) {
         'models/realistic_chicago_buildings.glb',
         function (gltf) {
             const office = gltf.scene;
-            office.scale.set(2*position.scale, position.scale, position.scale); 
+            office.scale.set(1.5*position.scale, position.scale, position.scale); 
             office.position.set(position.x, position.y, position.z);
             office.rotation.y = position.rotationY;
             scene.add(office);
@@ -141,8 +139,10 @@ function loadChicBuilding(position) {
         }
     );
 }
-const chicagopos = {x: -70, y: 0, z: 40, rotationY: 0, scale: .2};
+const chicagopos = {x: -62, y: -3.7, z: 40, rotationY: 0, scale: .2};
 loadChicBuilding(chicagopos);
+const chicagopos2 = {x: -31, y: -3.7, z: 20, rotationY: Math.PI, scale: .2};
+loadChicBuilding(chicagopos2);
 
 function load3Building(position) {
     buildingLoader.load(
