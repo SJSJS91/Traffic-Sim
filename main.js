@@ -10,7 +10,7 @@ document.body.appendChild(renderer.domElement);
 
 // Set Camera Position
 camera.position.set(0, 10, 20);
-// camera.position.set(0, 150, 0);
+camera.position.set(0, 150, 0);
 camera.lookAt(0, 0, 0);
 
 // Lighting
@@ -60,6 +60,7 @@ createRoad(0, -60, 0.2, 200, 20); // Horizontal road
 createRoad(0, 60, 0.2, 200, 20); // Horizontal road
 
 createRoad(-5, 0, 0.1, 20, 200,); // Vertical road
+createRoad(-90, 0, 0.1, 20, 130,)
 const shortRoad = createRoad(50, 0, 0.1, 20, 170,); // Vertical road
 shortRoad.position.z -= 15;
 
@@ -495,7 +496,7 @@ function animate() {
 
     if (playerCar) {
       updatePlayerCar();
-      updateCamera();
+    //   updateCamera();
     }
 
     updateTrafficLights(deltaTime);
