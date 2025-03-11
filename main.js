@@ -23,8 +23,10 @@ scene.add(ambientLight);
 
 
 const skyGeometry = new THREE.SphereGeometry(500, 32, 32);
+
 //const skyTexture = new THREE.TextureLoader().load('assets/day.jpeg');
 //const skyMaterial = new THREE.MeshBasicMaterial({ map: skyTexture, side: THREE.BackSide });
+
 // const skyTexture = new THREE.TextureLoader().load('assets/day.jpeg');
 const dayTexture = new THREE.TextureLoader().load('assets/day.jpeg');
 const nightTexture = new THREE.TextureLoader().load('assets/night.avif');
@@ -36,27 +38,27 @@ scene.add(skySphere);
 
 
 //this is the night sky box:
- // Toggle variable
- let isDay = true;
- 
- // Event listener for toggling
- window.addEventListener('keydown', (event) => {
-     if (event.key.toLowerCase() === 't') {
-         isDay = !isDay;
-         skyMaterial.map = isDay ? dayTexture : nightTexture;
-         skyMaterial.needsUpdate = true; // Ensure the material updates
-     }
-     // Adjust lighting
-     if (isDay) {
-         light.intensity = 1; // Full brightness for daytime
-         ambientLight.intensity = 0.5; // Normal ambient light
-         ambientLight.color.set(0xffffff); // White light
-     } else {
-         light.intensity = 0.3; // Dimmer light at night
-         ambientLight.intensity = 0.2; // Lower ambient light
-         ambientLight.color.set(0x446688); // Soft blue moonlight
-     }
- });
+// Toggle variable
+let isDay = true;
+
+// Event listener for toggling
+window.addEventListener('keydown', (event) => {
+    if (event.key.toLowerCase() === 't') {
+        isDay = !isDay;
+        skyMaterial.map = isDay ? dayTexture : nightTexture;
+        skyMaterial.needsUpdate = true; // Ensure the material updates
+    }
+    // Adjust lighting
+    if (isDay) {
+        light.intensity = 1; // Full brightness for daytime
+        ambientLight.intensity = 0.5; // Normal ambient light
+        ambientLight.color.set(0xffffff); // White light
+    } else {
+        light.intensity = 0.3; // Dimmer light at night
+        ambientLight.intensity = 0.2; // Lower ambient light
+        ambientLight.color.set(0x446688); // Soft blue moonlight
+    }
+});
 
 // Create Ground (City Base) - changed this to just be the sidewalk for now
 const groundGeometry = new THREE.PlaneGeometry(200, 200);
@@ -93,17 +95,15 @@ const shortRoad = createRoad(50, 0, 0.1, 20, 170,); // Vertical road
 shortRoad.position.z -= 15;
 
 
-// Create Buildings
+// Create Buildings -- this is only here because collision detection uses this fn
 const buildings = [];
 function createBuilding(x, z, width, height, depth) {
 
     const buildingGeometry = new THREE.BoxGeometry(width, height, depth);
     const buildingTexture = new THREE.TextureLoader().load('assets/bldng3.JPG');
     const buildingMaterial = new THREE.MeshStandardMaterial({ map: buildingTexture });
-    // const buildingMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
     const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
     building.position.set(x, height / 2, z);
-    // scene.add(building);
     buildings.push(building);
 
 }
@@ -892,7 +892,6 @@ function updateCamera() {
   camera.lookAt(playerCar.position);
 }
 
-
 let keys = {};
 document.addEventListener("keydown", (event) => keys[event.key.toLowerCase()] = true);
 document.addEventListener("keyup", (event) => keys[event.key.toLowerCase()] = false);
@@ -966,7 +965,7 @@ function animate() {
 
     if (playerCar) {
       updatePlayerCar();
-      updateCamera();
+    //   updateCamera();
     }
 
     // Update automated car
