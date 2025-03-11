@@ -1,0 +1,11 @@
+Model Information:
+* title:	Low poly Wagon
+* source:	https://sketchfab.com/3d-models/low-poly-wagon-0a38d4a341654a298564cb731cde790a
+* author:	arturs.vitas (https://sketchfab.com/arturs.vitas)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Low poly Wagon" (https://sketchfab.com/3d-models/low-poly-wagon-0a38d4a341654a298564cb731cde790a) by arturs.vitas (https://sketchfab.com/arturs.vitas) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

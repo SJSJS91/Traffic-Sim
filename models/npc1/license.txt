@@ -1,0 +1,11 @@
+Model Information:
+* title:	Samantha
+* source:	https://sketchfab.com/3d-models/samantha-2e6639aaa7f94bcfbf52512a54363e6b
+* author:	Indie_Weed (https://sketchfab.com/Indie_Weed)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Samantha" (https://sketchfab.com/3d-models/samantha-2e6639aaa7f94bcfbf52512a54363e6b) by Indie_Weed (https://sketchfab.com/Indie_Weed) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

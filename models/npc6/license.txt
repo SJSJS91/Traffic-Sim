@@ -1,0 +1,11 @@
+Model Information:
+* title:	Aaron Avatar
+* source:	https://sketchfab.com/3d-models/aaron-avatar-b99aa8c330f040649dbda4c082f6328b
+* author:	aaronBAM (https://sketchfab.com/aaronBAM)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Aaron Avatar" (https://sketchfab.com/3d-models/aaron-avatar-b99aa8c330f040649dbda4c082f6328b) by aaronBAM (https://sketchfab.com/aaronBAM) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
