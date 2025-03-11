@@ -606,8 +606,8 @@ autoCar3Loader.load('models/car_model/scene.gltf', function (gltfScene) {
 
 // Path for the automated car to follow (positions around a building)
 const autoCarPath = [
-  { x: -10, z: -6, rotation: 0},
-  { x: -10, z: 55, rotation: 0},
+  { x: -11.25, z: -6, rotation: 0},
+  { x: -11.25, z: 55, rotation: 0},
   { x: 2, z: 67, rotation: Math.PI / 2 },
   { x: 55, z: 67, rotation: Math.PI / 2 },
   { x: 55, z: 67, rotation: Math.PI},
@@ -954,6 +954,31 @@ function updatePlayerCar() {
         playerCar.position.set(startPosition.x, startPosition.y, startPosition.z);
         speed = 0;
     }
+
+    const autoBox = new THREE.Box3().setFromObject(autoCar);
+    const autoBox2 = new THREE.Box3().setFromObject(autoCar2);
+    const autoBox3 = new THREE.Box3().setFromObject(autoCar3); 
+
+    if (autoBox.intersectsBox(autoBox2)) {
+        autoCarState.position.x = -20;
+        autoCarState.position.z = 20;
+        autoCarState.targetWaypoint = 1;
+    }
+
+    if (autoBox.intersectsBox(autoBox3)) {
+        autoCarState.position.x = -20;
+        autoCarState.position.z = 20;
+        autoCarState.targetWaypoint = 1;
+    }
+
+    if (autoBox2.intersectsBox(autoBox3)) {
+        autoCar2State.position.x = -20;
+        autoCar2State.position.z = -60;
+        autoCar2State.targetWaypoint = 1;
+    }
+
+
+
 }
 
 let lastTime = performance.now();
