@@ -10,7 +10,7 @@ document.body.appendChild(renderer.domElement);
 
 // Set Camera Position
 camera.position.set(0, 10, 20);
-camera.position.set(0, 150, 0);
+// camera.position.set(0, 150, 0);
 camera.lookAt(0, 0, 0);
 
 // Lighting
@@ -23,12 +23,37 @@ scene.add(ambientLight);
 
 
 const skyGeometry = new THREE.SphereGeometry(500, 32, 32);
-const skyTexture = new THREE.TextureLoader().load('assets/day.jpeg');
-const skyMaterial = new THREE.MeshBasicMaterial({ map: skyTexture, side: THREE.BackSide });
+// const skyTexture = new THREE.TextureLoader().load('assets/day.jpeg');
+const dayTexture = new THREE.TextureLoader().load('assets/day.jpeg');
+const nightTexture = new THREE.TextureLoader().load('assets/night.avif');
+const skyMaterial = new THREE.MeshBasicMaterial({ map: dayTexture, side: THREE.BackSide });
 //if toggle night, make the skyTexture a night texture
 const skySphere = new THREE.Mesh(skyGeometry, skyMaterial);
 skySphere.position.set(0, 0, 0);
 scene.add(skySphere);
+
+//this is the night sky box:
+// Toggle variable
+let isDay = true;
+
+// Event listener for toggling
+window.addEventListener('keydown', (event) => {
+    if (event.key.toLowerCase() === 't') {
+        isDay = !isDay;
+        skyMaterial.map = isDay ? dayTexture : nightTexture;
+        skyMaterial.needsUpdate = true; // Ensure the material updates
+    }
+    // Adjust lighting
+    if (isDay) {
+        light.intensity = 1; // Full brightness for daytime
+        ambientLight.intensity = 0.5; // Normal ambient light
+        ambientLight.color.set(0xffffff); // White light
+    } else {
+        light.intensity = 0.3; // Dimmer light at night
+        ambientLight.intensity = 0.2; // Lower ambient light
+        ambientLight.color.set(0x446688); // Soft blue moonlight
+    }
+});
 
 // Create Ground (City Base) - changed this to just be the sidewalk for now
 const groundGeometry = new THREE.PlaneGeometry(200, 200);
@@ -432,7 +457,6 @@ function updateCamera() {
   // Make the camera look at the car
   camera.lookAt(playerCar.position);
 }
-
 
 let keys = {};
 document.addEventListener("keydown", (event) => keys[event.key.toLowerCase()] = true);
