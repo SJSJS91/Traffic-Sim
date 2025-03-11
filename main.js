@@ -14,26 +14,31 @@ function startGame() {
         setTimeout(() => introScreen.style.display = 'none', 500);
     }
 
-    // Hide win screen if restarting
     const winScreen = document.getElementById('winScreen');
     if (winScreen) {
-        winScreen.style.display = 'none';
+        winScreen.style.display = 'none'; // Hide win screen when restarting
     }
 
     gameStarted = true;
-    didPlayerWin = false; // Reset win condition
+    didPlayerWin = false;
+    resetGameObjects();
     animate(); // Start the game loop
 }
 function playerWins() {
-    if (didPlayerWin) return; // Prevent multiple triggers
+    // if (didPlayerWin) return; // Prevent multiple triggers
 
     didPlayerWin = true;
     gameStarted = false;
 
-    // Show the win screen
     const winScreen = document.getElementById('winScreen');
     if (winScreen) {
         winScreen.style.display = 'block';
+    }
+}
+
+function resetGameObjects() {
+    if (playerCar) {
+        playerCar.position.set(0, 0, 0); // Reset player position when restarting game after winning
     }
 }
 
@@ -80,6 +85,7 @@ window.addEventListener('keydown', (event) => {
         skyMaterial.map = isDay ? dayTexture : nightTexture;
         skyMaterial.needsUpdate = true; // Ensure the material updates
         didPlayerWin = true;
+        console.log("didDplayerWIn: is true");
     }
     // Adjust lighting
     if (isDay) {
@@ -554,7 +560,7 @@ window.addEventListener('keydown', (event) => {
     }
 });
 
-// Event listener for clicking the start button
+//Event listener for clicking the start button
 document.getElementById('startButton').addEventListener('click', startGame);
 document.getElementById('restartButton').addEventListener('click', startGame);
 
@@ -574,5 +580,9 @@ function animate() {
 
     updateTrafficLights(deltaTime);
     renderer.render(scene, camera);
+
+    if(didPlayerWin) {
+        playerWins();
+    }
 }
 //   animate();
