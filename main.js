@@ -1,6 +1,43 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+
+let gameStarted = false;
+let didPlayerWin = false;
+
+function startGame() {
+    if (gameStarted) return; // Prevent multiple starts
+
+    const introScreen = document.getElementById('introScreen');
+    if (introScreen) {
+        introScreen.style.opacity = '0';
+        setTimeout(() => introScreen.style.display = 'none', 500);
+    }
+
+    // Hide win screen if restarting
+    const winScreen = document.getElementById('winScreen');
+    if (winScreen) {
+        winScreen.style.display = 'none';
+    }
+
+    gameStarted = true;
+    didPlayerWin = false; // Reset win condition
+    animate(); // Start the game loop
+}
+function playerWins() {
+    if (didPlayerWin) return; // Prevent multiple triggers
+
+    didPlayerWin = true;
+    gameStarted = false;
+
+    // Show the win screen
+    const winScreen = document.getElementById('winScreen');
+    if (winScreen) {
+        winScreen.style.display = 'block';
+    }
+}
+
+
 // Setup Scene, Camera, and Renderer
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -42,6 +79,7 @@ window.addEventListener('keydown', (event) => {
         isDay = !isDay;
         skyMaterial.map = isDay ? dayTexture : nightTexture;
         skyMaterial.needsUpdate = true; // Ensure the material updates
+        didPlayerWin = true;
     }
     // Adjust lighting
     if (isDay) {
@@ -510,8 +548,20 @@ function updatePlayerCar() {
     }
 }
 
+window.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        startGame();
+    }
+});
+
+// Event listener for clicking the start button
+document.getElementById('startButton').addEventListener('click', startGame);
+document.getElementById('restartButton').addEventListener('click', startGame);
+
 let lastTime = performance.now();
 function animate() {
+    if (!gameStarted) return;
+
     requestAnimationFrame(animate);
 
     let now = performance.now();
@@ -520,10 +570,9 @@ function animate() {
 
     if (playerCar) {
       updatePlayerCar();
-    //   updateCamera();
     }
 
     updateTrafficLights(deltaTime);
     renderer.render(scene, camera);
-  }
-  animate();
+}
+//   animate();
