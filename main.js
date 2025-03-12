@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 let gameStarted = false;
 let didPlayerWin = false;
+let gamePaused = false;
 
 function startGame() {
     if (gameStarted) return; // Prevent multiple starts
@@ -21,6 +22,7 @@ function startGame() {
 
     gameStarted = true;
     didPlayerWin = false;
+    gamePaused = false;
     resetGameObjects();
     animate(); // Start the game loop
 }
@@ -84,8 +86,8 @@ window.addEventListener('keydown', (event) => {
         isDay = !isDay;
         skyMaterial.map = isDay ? dayTexture : nightTexture;
         skyMaterial.needsUpdate = true; // Ensure the material updates
-        didPlayerWin = true;
-        console.log("didDplayerWIn: is true");
+        didPlayerWin = true; //***CHANGE THIS ONCE WE GET COLLISION DETECTION FOR THE EXIT */
+        // console.log("didDplayerWIn: is true");
     }
     // Adjust lighting
     if (isDay) {
@@ -97,7 +99,22 @@ window.addEventListener('keydown', (event) => {
         ambientLight.intensity = 0.2; // Lower ambient light
         ambientLight.color.set(0x446688); // Soft blue moonlight
     }
+    //hit space to pause:
+    if (event.code === 'Space') {
+        if (!didPlayerWin) {
+            gamePaused = !gamePaused;
+
+            // Show/hide pause screen
+            document.getElementById('pauseScreen').style.display = gamePaused ? 'block' : 'none';
+        }
+
+        // If unpausing, resume game loop
+        if (!gamePaused && gameStarted) {
+            animate();
+        }
+    }
 });
+
 
 // Create Ground (City Base) - changed this to just be the sidewalk for now
 const groundGeometry = new THREE.PlaneGeometry(200, 200);
@@ -566,7 +583,8 @@ document.getElementById('restartButton').addEventListener('click', startGame);
 
 let lastTime = performance.now();
 function animate() {
-    if (!gameStarted) return;
+    // if (!gameStarted) return;
+    if (!gameStarted || gamePaused) return;
 
     requestAnimationFrame(animate);
 

@@ -102,3 +102,26 @@ h2 {
 #winScreen button:hover {
     background-color: #45a049;
 }
+
+
+#pauseScreen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    display: none;
+}
+
+#pauseScreen h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+#pauseScreen p {
+    font-size: 18px;
+}
