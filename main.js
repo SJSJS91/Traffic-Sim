@@ -23,6 +23,10 @@ scene.add(ambientLight);
 
 
 const skyGeometry = new THREE.SphereGeometry(500, 32, 32);
+
+//const skyTexture = new THREE.TextureLoader().load('assets/day.jpeg');
+//const skyMaterial = new THREE.MeshBasicMaterial({ map: skyTexture, side: THREE.BackSide });
+
 // const skyTexture = new THREE.TextureLoader().load('assets/day.jpeg');
 const dayTexture = new THREE.TextureLoader().load('assets/day.jpeg');
 const nightTexture = new THREE.TextureLoader().load('assets/night.avif');
@@ -33,27 +37,27 @@ skySphere.position.set(0, 0, 0);
 scene.add(skySphere);
 
 //this is the night sky box:
-// Toggle variable
-let isDay = true;
-
-// Event listener for toggling
-window.addEventListener('keydown', (event) => {
-    if (event.key.toLowerCase() === 't') {
-        isDay = !isDay;
-        skyMaterial.map = isDay ? dayTexture : nightTexture;
-        skyMaterial.needsUpdate = true; // Ensure the material updates
-    }
-    // Adjust lighting
-    if (isDay) {
-        light.intensity = 1; // Full brightness for daytime
-        ambientLight.intensity = 0.5; // Normal ambient light
-        ambientLight.color.set(0xffffff); // White light
-    } else {
-        light.intensity = 0.3; // Dimmer light at night
-        ambientLight.intensity = 0.2; // Lower ambient light
-        ambientLight.color.set(0x446688); // Soft blue moonlight
-    }
-});
+ // Toggle variable
+ let isDay = true;
+ 
+ // Event listener for toggling
+ window.addEventListener('keydown', (event) => {
+     if (event.key.toLowerCase() === 't') {
+         isDay = !isDay;
+         skyMaterial.map = isDay ? dayTexture : nightTexture;
+         skyMaterial.needsUpdate = true; // Ensure the material updates
+     }
+     // Adjust lighting
+     if (isDay) {
+         light.intensity = 1; // Full brightness for daytime
+         ambientLight.intensity = 0.5; // Normal ambient light
+         ambientLight.color.set(0xffffff); // White light
+     } else {
+         light.intensity = 0.3; // Dimmer light at night
+         ambientLight.intensity = 0.2; // Lower ambient light
+         ambientLight.color.set(0x446688); // Soft blue moonlight
+     }
+ });
 
 // Create Ground (City Base) - changed this to just be the sidewalk for now
 const groundGeometry = new THREE.PlaneGeometry(200, 200);
@@ -91,6 +95,7 @@ shortRoad.position.z -= 15;
 
 
 // Create Buildings
+
 const buildings = [];
 const buildingLoader = new GLTFLoader();
 
@@ -129,14 +134,17 @@ loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 10, y: 0, z:
 loadBuilding('models/low-poly_building.glb', { x: -54, y: 0, z: -82, rotationY: Math.PI, scale: 100 }, { x: 2, y: 1, z: 1 });
 loadBuilding('models/office_building.glb', { x: -60, y: 20, z: 75, rotationY: 0, scale: 0.22 });
 /*
+
 const buildings = [];
 function createBuilding(x, z, width, height, depth) {
 
     const buildingGeometry = new THREE.BoxGeometry(width, height, depth);
     const buildingTexture = new THREE.TextureLoader().load('assets/bldng3.JPG');
     const buildingMaterial = new THREE.MeshStandardMaterial({ map: buildingTexture });
+    // const buildingMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
     const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
     building.position.set(x, height / 2, z);
+    // scene.add(building);
     buildings.push(building);
 
 }
@@ -505,6 +513,7 @@ function loadCar(modelPath, position, scale, rotationY = Math.PI, isPlayerCar = 
     });
 }
 
+
 // Car models list
 const carModels = [
     'models/player_car/scene.gltf',
@@ -513,6 +522,19 @@ const carModels = [
     'models/car_model_3/scene.gltf',
     'models/car_model_4/scene.gltf',
     'models/car_model_5/scene.gltf'
+
+// Path for the automated car to follow (positions around a building)
+const autoCarPath = [
+  { x: -11.25, z: -6, rotation: 0},
+  { x: -11.25, z: 55, rotation: 0},
+  { x: 2, z: 67, rotation: Math.PI / 2 },
+  { x: 55, z: 67, rotation: Math.PI / 2 },
+  { x: 55, z: 67, rotation: Math.PI},
+  { x: 55, z: -6, rotation: Math.PI},
+  { x: 55, z: -6, rotation: -Math.PI / 2 },
+  { x: -8, z: -6, rotation: -Math.PI / 2 },
+  { x: -8, z: -6, rotation: 0 }
+
 ];
 
 
@@ -643,6 +665,7 @@ function updateCamera() {
     }
 }
 
+
 let keys = {};
 document.addEventListener("keydown", (event) => keys[event.key.toLowerCase()] = true);
 document.addEventListener("keyup", (event) => keys[event.key.toLowerCase()] = false);
@@ -713,7 +736,33 @@ function updatePlayerCar(deltaTime) {
         playerCar.position.set(startPosition.x, startPosition.y, startPosition.z);
         speed = 0;
     }
-        
+
+
+    const autoBox = new THREE.Box3().setFromObject(autoCar);
+    const autoBox2 = new THREE.Box3().setFromObject(autoCar2);
+    const autoBox3 = new THREE.Box3().setFromObject(autoCar3); 
+
+    if (autoBox.intersectsBox(autoBox2)) {
+        autoCarState.position.x = -20;
+        autoCarState.position.z = 20;
+        autoCarState.targetWaypoint = 1;
+    }
+
+    if (autoBox.intersectsBox(autoBox3)) {
+        autoCarState.position.x = -20;
+        autoCarState.position.z = 20;
+        autoCarState.targetWaypoint = 1;
+    }
+
+    if (autoBox2.intersectsBox(autoBox3)) {
+        autoCar2State.position.x = -20;
+        autoCar2State.position.z = -60;
+        autoCar2State.targetWaypoint = 1;
+    }
+
+
+
+
 }
 function animate() {
     requestAnimationFrame(animate);
@@ -721,7 +770,9 @@ function animate() {
     let deltaTime = clock.getDelta();
 
     if (playerCar) {
+
       updatePlayerCar(deltaTime);
+
       updateCamera();
     }
 
