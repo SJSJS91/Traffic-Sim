@@ -160,8 +160,9 @@ function loadOfficeBuilding(position) {
             
             // Apply rotation based on the provided rotationY value
             office.rotation.y = position.rotationY;
-            buildings.push(office);
+
             scene.add(office);
+            buildings.push(office);
             console.log("Office model loaded at:", position);
         },
         undefined,
@@ -181,8 +182,8 @@ function loadBrownBuilding(position) {
             office.scale.set(position.scale, position.scale, position.scale); 
             office.position.set(position.x, position.y, position.z);
             office.rotation.y = position.rotationY;
-            buildings.push(office);
             scene.add(office);
+            buildings.push(office);
             console.log("Office model loaded at:", position);
         },
         undefined,
@@ -202,8 +203,8 @@ function loadChicBuilding(position) {
             office.scale.set(1.5*position.scale, position.scale, position.scale); 
             office.position.set(position.x, position.y, position.z);
             office.rotation.y = position.rotationY;
-            buildings.push(office);
             scene.add(office);
+            buildings.push(office);
             console.log("Office model loaded at:", position);
         },
         undefined,
@@ -225,8 +226,8 @@ function load3Building(position) {
             office.scale.set(position.scale, position.scale, position.scale);  
             office.position.set(position.x, position.y, position.z);
             office.rotation.y = position.rotationY;
-            buildings.push(office);
             scene.add(office);
+            buildings.push(office);
             console.log("Office model loaded at:", position);
         },
         undefined,
@@ -252,8 +253,8 @@ function loadWhiteB(position) {
             office.scale.set(2*position.scale, position.scale, position.scale); 
             office.position.set(position.x, position.y, position.z);
             office.rotation.y = position.rotationY;
-            buildings.push(office);
             scene.add(office);
+            buildings.push(office);
             console.log("Office model loaded at:", position);
         },
         undefined,
@@ -274,8 +275,8 @@ function loadExpensiveOfficeBuilding(position) {
             office.scale.set(position.scale, position.scale, position.scale); 
             office.position.set(position.x, position.y, position.z);
             office.rotation.y = position.rotationY;
-            buildings.push(office);
             scene.add(office);
+            buildings.push(office);
             console.log("Office model loaded at:", position);
         },
         undefined,
@@ -288,14 +289,13 @@ const expPos = {x: -60, y: 20, z: 75, rotationY: 0, scale: .22};
 loadExpensiveOfficeBuilding(expPos);
 */
 
-
 // Create Boundary Walls
 const walls = [];
 
 function createWall(x, z, width, height, depth) {
     const wallGeometry = new THREE.BoxGeometry(width, height, depth); 
     const wallTexture = new THREE.TextureLoader().load('assets/wood.jpg');
-    const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture}); 
+    const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture }); 
     const wall = new THREE.Mesh(wallGeometry, wallMaterial);
     wall.position.set(x, height / 2, z); // Set position
     scene.add(wall);
@@ -362,7 +362,7 @@ switch (index) {
 
 
 
-// Traffic Light Class 
+// Traffic Light Class
 class TrafficLight {
     constructor(x, z, rotation, visibleDirection) {
         this.state = 'red'; // Initial state
@@ -370,18 +370,24 @@ class TrafficLight {
         this.visibleDirection = visibleDirection;
         
         // Pole
-        const poleGeometry = new THREE.CylinderGeometry(0.2, 0.2, 4, 32);
-        const poleMaterial = new THREE.MeshStandardMaterial({ color: 0x555555 });
-        const pole = new THREE.Mesh(poleGeometry, poleMaterial);
-        pole.position.set(0, 2, 0);
-        this.group.add(pole);
+        const poleGeometry = new THREE.CylinderGeometry(0.2, 0.2, 8, 32);
+        const poleMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 });
+        this.pole = new THREE.Mesh(poleGeometry, poleMaterial);
+        this.pole.position.set(7, 2, 0);
+        this.group.add(this.pole);
 
         // Light Box
-        const boxGeometry = new THREE.BoxGeometry(0.75, 2, 0.5);
+        const boxGeometry = new THREE.BoxGeometry(12, 0.3, 0.5);
         const boxMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 });
         this.box = new THREE.Mesh(boxGeometry, boxMaterial);
-        this.box.position.set(0, 3.5, 0.3);
+        this.box.position.set(1, 5.75, 0.1);
         this.group.add(this.box);
+
+        const box2Geometry = new THREE.BoxGeometry(0.75, 2, 0.5);
+        const box2Material = new THREE.MeshStandardMaterial({ color: 0x222222 });
+        this.box2 = new THREE.Mesh(box2Geometry, box2Material);
+        this.box2.position.set(-4.4, 4.75, 0.1);
+        this.group.add(this.box2);
 
         // Lights
         this.lights = {};
@@ -390,7 +396,7 @@ class TrafficLight {
             const lightGeometry = new THREE.SphereGeometry(0.3, 16, 16);
             const lightMaterial = new THREE.MeshStandardMaterial({ emissive: color });
             const light = new THREE.Mesh(lightGeometry, lightMaterial);
-            light.position.set(0, 4.2 - index * 0.6, 0.5);
+            light.position.set(-4.4, 5.45 - index * 0.6, -0.125);
             this.group.add(light);
             this.lights[color] = light;
         });
@@ -400,7 +406,8 @@ class TrafficLight {
         
         this.updateLights();
 
-        this.boundingBox = new THREE.Box3().setFromObject(this.group);
+        // Dynamically compute bounding box based only on the pole
+        this.boundingBox = new THREE.Box3().setFromObject(this.pole);
     }
 
     updateLights() {
@@ -416,25 +423,72 @@ class TrafficLight {
     }
 
     updateBoundingBox() {
-        this.boundingBox.setFromObject(this.group);
+        //this.boundingBox.setFromObject(this.group);
+
+        this.boundingBox.setFromObject(this.pole);
     }
 }
 
 // Create Traffic Lights at Two 4-Way Intersections
 const trafficLights = [];
-trafficLights.push(new TrafficLight(-8.5, -3.5, Math.PI / 2, true)); // Intersection 1
-trafficLights.push(new TrafficLight(-1.5, 3.5, -Math.PI / 2, true));
-trafficLights.push(new TrafficLight(-8.5, 3.5, -Math.PI, true));
-trafficLights.push(new TrafficLight(-1.5, -3.5, 0, true));
-trafficLights.push(new TrafficLight(11.5, -3.5, Math.PI / 2, true)); // Intersection 2
-trafficLights.push(new TrafficLight(18.5, 3.5, -Math.PI / 2, true));
-trafficLights.push(new TrafficLight(18.5, -3.5, 0, true));
-trafficLights.push(new TrafficLight(11.5, 3.5, Math.PI, true));
+trafficLights.push(new TrafficLight(-18.5, -3.5, Math.PI / 2, true)); // Intersection 1
+trafficLights.push(new TrafficLight(6.5, 3.5, -Math.PI / 2, true));
+trafficLights.push(new TrafficLight(-9, 14, -Math.PI, true));
+trafficLights.push(new TrafficLight(-1.5, -13, 0, true));
+trafficLights.push(new TrafficLight(37.5, -4, Math.PI / 2, true)); // Intersection 2
+trafficLights.push(new TrafficLight(61.5, 3.5, -Math.PI / 2, true));
+trafficLights.push(new TrafficLight(53.5, -13, 0, true));
+trafficLights.push(new TrafficLight(46.5, 14, Math.PI, true));
+trafficLights.push(new TrafficLight(37.5, -63.5, Math.PI / 2, true)); // Intersection 3
+trafficLights.push(new TrafficLight(61.5, -56.5, -Math.PI / 2, true));
+trafficLights.push(new TrafficLight(53.5, -72.5, 0, true));
+trafficLights.push(new TrafficLight(46.5, -45.5, Math.PI, true));
+trafficLights.push(new TrafficLight(-18.5, -63.5, Math.PI / 2, true)); // Intersection 4
+trafficLights.push(new TrafficLight(6.5, -56.5, -Math.PI / 2, true));
+trafficLights.push(new TrafficLight(-1.5, -72.5, 0, true));
+trafficLights.push(new TrafficLight(-9, -45.5, Math.PI, true));
+trafficLights.push(new TrafficLight(-18.5, 56.5, Math.PI / 2, true)); // Intersection 1
+trafficLights.push(new TrafficLight(6.5, 63.5, -Math.PI / 2, true));
+trafficLights.push(new TrafficLight(-9, 74, -Math.PI, true));
+trafficLights.push(new TrafficLight(-1.5, 47, 0, true));
 
 trafficLights.forEach(light => scene.add(light.group));
 
+
+let stopSign;
+const loader1 = new GLTFLoader();
+
+loader1.load( 'models/stop_sign/scene.gltf', function ( gltfScene ) {
+  stopSign = gltfScene.scene;
+  stopSign.position.set(-78, 0, -11.5);
+  stopSign.scale.set(0.4, 0.4, 0.4);
+  stopSign.rotation.y = Math.PI;
+  scene.add( stopSign );
+
+}, undefined, function ( error ) {
+
+	console.error( error );
+
+} );
+
+let stopSign2;
+const loader2 = new GLTFLoader();
+
+loader2.load( 'models/stop_sign/scene.gltf', function ( gltfScene ) {
+  stopSign2 = gltfScene.scene;
+  stopSign2.position.set(39, 0, 49);
+  stopSign2.scale.set(0.4, 0.4, 0.4);
+  stopSign2.rotation.y = -Math.PI/2;
+  scene.add( stopSign2 );
+
+}, undefined, function ( error ) {
+
+	console.error( error );
+
+} );
+
+
 // Traffic Light Cycle
-const clock = new THREE.Clock();
 let timeElapsed = 0;
 function updateTrafficLights(deltaTime) {
     timeElapsed += deltaTime;
@@ -449,11 +503,29 @@ function updateTrafficLights(deltaTime) {
         trafficLights[5].setState('green');
         trafficLights[6].setState('red');
         trafficLights[7].setState('red');
+        trafficLights[8].setState('green');
+        trafficLights[9].setState('green');
+        trafficLights[10].setState('red');
+        trafficLights[11].setState('red');
+        trafficLights[12].setState('green');
+        trafficLights[13].setState('green');
+        trafficLights[14].setState('red');
+        trafficLights[15].setState('red');
+        trafficLights[16].setState('green');
+        trafficLights[17].setState('green');
+        trafficLights[18].setState('red');
+        trafficLights[19].setState('red');
     } else if (cycleTime < 7) {
         trafficLights[0].setState('yellow');
         trafficLights[1].setState('yellow');
         trafficLights[4].setState('yellow');
         trafficLights[5].setState('yellow');
+        trafficLights[8].setState('yellow');
+        trafficLights[9].setState('yellow');
+        trafficLights[12].setState('yellow');
+        trafficLights[13].setState('yellow');
+        trafficLights[16].setState('yellow');
+        trafficLights[17].setState('yellow');
     } else if (cycleTime < 12) {
         trafficLights[0].setState('red');
         trafficLights[1].setState('red');
@@ -463,26 +535,44 @@ function updateTrafficLights(deltaTime) {
         trafficLights[5].setState('red');
         trafficLights[6].setState('green');
         trafficLights[7].setState('green');
+        trafficLights[8].setState('red');
+        trafficLights[9].setState('red');
+        trafficLights[10].setState('green');
+        trafficLights[11].setState('green');
+        trafficLights[12].setState('red');
+        trafficLights[13].setState('red');
+        trafficLights[14].setState('green');
+        trafficLights[15].setState('green');
+        trafficLights[16].setState('red');
+        trafficLights[17].setState('red');
+        trafficLights[18].setState('green');
+        trafficLights[19].setState('green');
     } else {
         trafficLights[2].setState('yellow');
         trafficLights[3].setState('yellow');
         trafficLights[6].setState('yellow');
         trafficLights[7].setState('yellow');
+        trafficLights[10].setState('yellow');
+        trafficLights[11].setState('yellow');
+        trafficLights[14].setState('yellow');
+        trafficLights[15].setState('yellow');
+        trafficLights[18].setState('yellow');
+        trafficLights[19].setState('yellow');
     }
 }
 
 // Create Player Car
-const startPosition = { x: 0, y: 0.2, z: 0 };
+const startPosition = { x: -90, y: 0.2, z: 0 };
 
-/*
+
 let playerCar;
 const loader = new GLTFLoader();
 
 loader.load( 'models/player_car/scene.gltf', function ( gltfScene ) {
   playerCar = gltfScene.scene;
-  playerCar.position.set(startPosition.x, startPosition.y, startPosition.z);
+  playerCar.position.set(0, 0.2, 0);
   playerCar.scale.set(1, 1, 1);
-  playerCar.rotation.y = Math.PI;
+  playerCar.rotation.y = Math.PI / 2;
   scene.add( playerCar );
 
 }, undefined, function ( error ) {
@@ -490,13 +580,15 @@ loader.load( 'models/player_car/scene.gltf', function ( gltfScene ) {
 	console.error( error );
 
 } );
- */
+ 
+
+/*
 let playerCar;
 const cars = []; 
 const loader = new GLTFLoader();
 
 // Function to load a car model
-function loadCar(modelPath, position, scale, rotationY = Math.PI, isPlayerCar = false) {
+function loadCar(modelPath, position, scale, rotationY = Math.PI / 2, isPlayerCar = false) {
     loader.load(modelPath, function (gltfScene) {
         const car = gltfScene.scene;
         car.position.set(position.x, position.y, position.z);
@@ -522,27 +614,14 @@ const carModels = [
     'models/car_model_3/scene.gltf',
     'models/car_model_4/scene.gltf',
     'models/car_model_5/scene.gltf'
-
-// Path for the automated car to follow (positions around a building)
-const autoCarPath = [
-  { x: -11.25, z: -6, rotation: 0},
-  { x: -11.25, z: 55, rotation: 0},
-  { x: 2, z: 67, rotation: Math.PI / 2 },
-  { x: 55, z: 67, rotation: Math.PI / 2 },
-  { x: 55, z: 67, rotation: Math.PI},
-  { x: 55, z: -6, rotation: Math.PI},
-  { x: 55, z: -6, rotation: -Math.PI / 2 },
-  { x: -8, z: -6, rotation: -Math.PI / 2 },
-  { x: -8, z: -6, rotation: 0 }
-
 ];
 
 
 const carConfigs = [
-    { position: { x: 0, y: 0.2, z: 0 }, scale: 1 },  // Player car
-    { position: { x: -5, y: 0.2, z: 0 }, scale: 1.75 },
-    { position: { x: 10, y: 0.2, z: 0 }, scale: 1.25 },
-    { position: { x: 0, y: 0.2, z: 5 }, scale: 1.25 },
+    { position: { x: -90, y: 0.2, z: 0 }, scale: 1 },  // Player car
+    { position: { x: -20, y: 0.2, z: 20 }, scale: 1.75 },
+    { position: { x: -20, y: 0.2, z: -60 }, scale: 1.25 },
+    { position: { x: 2, y: 0.2, z: 0 }, scale: 1.25 },
     { position: { x: 0, y: 0.2, z: -15 }, scale: 0.9 },
     { position: { x: 15, y: 0.2, z: 0 }, scale: 1.25 }
 ];
@@ -559,6 +638,281 @@ setTimeout(() => {
         playerCar = cars[0];
     }
 }, 1000); // Delay check to wait for loading
+*/
+
+
+// Automated Car
+let autoCar;// = cars[1];
+const autoCarLoader = new GLTFLoader();
+
+autoCarLoader.load('models/car_model_1/scene.gltf', function (gltfScene) {
+  autoCar = gltfScene.scene;
+  autoCar.position.copy(autoCarState.position);
+  //autoCar.position.set(-20, 0.5, 0); // Starting position
+  autoCar.scale.set(1.75, 1.75, 1.75);
+  autoCar.rotation.y = autoCarState.rotation;
+  //autoCar.rotation.y = Math.PI / 2; // Initial rotation
+  scene.add(autoCar);
+}, undefined, function (error) {
+  console.error('Error loading automated car:', error);
+});
+
+// Second Automated Car
+let autoCar2;// = cars[2];
+const autoCar2Loader = new GLTFLoader();
+
+autoCar2Loader.load('models/car_model_2/scene.gltf', function (gltfScene) {
+    autoCar2 = gltfScene.scene;
+    autoCar2.position.copy(autoCar2State.position);
+    autoCar2.scale.set(1.25, 1.25, 1.25);
+    autoCar2.rotation.y = autoCar2State.rotation;
+    scene.add(autoCar2);
+  }, undefined, function (error) {
+    console.error('Error loading automated car:', error);
+});
+
+// Third Automated Car
+let autoCar3;// = cars[3];
+const autoCar3Loader = new GLTFLoader();
+
+autoCar3Loader.load('models/car_model_3/scene.gltf', function (gltfScene) {
+    autoCar3 = gltfScene.scene;
+    autoCar3.position.copy(autoCar3State.position);
+    autoCar3.scale.set(1.25, 1.25, 1.25);
+    autoCar3.rotation.y = autoCar3State.rotation;
+    scene.add(autoCar3);
+  }, undefined, function (error) {
+    console.error('Error loading automated car:', error);
+});
+
+// Path for the automated car to follow (positions around a building)
+const autoCarPath = [
+  { x: -11.25, z: -6, rotation: 0},
+  { x: -11.25, z: 55, rotation: 0},
+  { x: 2, z: 67, rotation: Math.PI / 2 },
+  { x: 55, z: 67, rotation: Math.PI / 2 },
+  { x: 55, z: 67, rotation: Math.PI},
+  { x: 55, z: -6, rotation: Math.PI},
+  { x: 55, z: -6, rotation: -Math.PI / 2 },
+  { x: -8, z: -6, rotation: -Math.PI / 2 },
+  { x: -8, z: -6, rotation: 0 }
+];
+
+const autoCar3Path = [
+    { x: 2, z: -60, rotation: 0},
+    { x: 2, z: -60, rotation: 0},
+    { x: 50, z: -55, rotation: Math.PI / 2 },
+    { x: 45, z: 0, rotation: Math.PI / 2 },
+    { x: 45, z: 70, rotation: Math.PI},
+    { x: 85, z: 65, rotation: Math.PI},
+    { x: 51, z: 57, rotation: Math.PI},
+    { x: 51, z: -6, rotation: Math.PI},
+    { x: 51, z: -6, rotation: -Math.PI / 2 },
+    { x: -5, z: -6, rotation: -Math.PI / 2 },
+    { x: -5, z: -6, rotation: 0 }
+  ];
+
+let currentPathIndex = 0;
+let pathProgress = 0;
+const autoCarSpeed = 0.15;
+const autoCarTurnSpeed = 0.03;
+
+// Current state of the automated car
+let autoCarState = {
+    position: new THREE.Vector3(-20, 0.2, 20), // Starting position
+    rotation: Math.PI / 2, // Initial rotation in radians
+    targetWaypoint: 1 // Index of next waypoint (start at 1 since we're at 0)
+  };
+
+  // Create a second car state - using a different starting position on the path
+let autoCar2State = {
+    position: new THREE.Vector3(-20, 0.2, -60), // Different starting position (third waypoint)
+    rotation: Math.PI / 2, // Initial rotation for this position
+    targetWaypoint: 1 // Start targeting the fourth waypoint
+  };
+
+let autoCar3State = {
+    position: new THREE.Vector3(2, 0.2, 0), // Different starting position (third waypoint)
+    rotation: -Math.PI / 2, // Initial rotation for this position
+    targetWaypoint: 1 // Start targeting the fourth waypoint
+  };
+
+// Function to update the automated car's position
+function updateAutoCar(deltaTime) {
+  if (!autoCar) return;
+
+
+  // Get current target waypoint
+  const targetWaypoint = autoCarPath[autoCarState.targetWaypoint];
+  
+  // Calculate direction to target
+  const directionToTarget = new THREE.Vector2(
+    targetWaypoint.x - autoCarState.position.x,
+    targetWaypoint.z - autoCarState.position.z
+);
+
+
+const distanceToTarget = directionToTarget.length();
+
+// If we've reached the waypoint (within a small threshold)
+if (distanceToTarget < 10) {
+    // Move to next waypoint
+    autoCarState.targetWaypoint = (autoCarState.targetWaypoint + 1) % autoCarPath.length;
+}
+
+// Calculate ideal heading (angle) to target
+const targetAngle = Math.atan2(directionToTarget.x, directionToTarget.y);
+
+// Calculate difference between current rotation and target angle
+let rotationDiff = targetAngle - autoCarState.rotation;
+
+// Normalize the difference to be between -PI and PI
+if (rotationDiff > Math.PI) rotationDiff -= 2 * Math.PI;
+if (rotationDiff < -Math.PI) rotationDiff += 2 * Math.PI;
+
+
+// Apply rotation - limited by turn speed
+if (Math.abs(rotationDiff) > 0.01) {
+    const rotationAmount = Math.sign(rotationDiff) * Math.min(autoCarTurnSpeed, Math.abs(rotationDiff));
+    autoCarState.rotation += rotationAmount;
+    
+    // Normalize rotation to be between 0 and 2*PI
+    if (autoCarState.rotation > Math.PI * 2) autoCarState.rotation -= Math.PI * 2;
+    if (autoCarState.rotation < 0) autoCarState.rotation += Math.PI * 2;
+}
+
+
+// Always move forward in the direction the car is facing
+autoCarState.position.x += Math.sin(autoCarState.rotation) * autoCarSpeed;
+autoCarState.position.z += Math.cos(autoCarState.rotation) * autoCarSpeed;
+
+// Update the actual car model position and rotation
+autoCar.position.set(autoCarState.position.x, autoCarState.position.y, autoCarState.position.z);
+autoCar.rotation.y = autoCarState.rotation;
+
+}
+
+function updateAutoCar2(deltaTime) {
+    if (!autoCar2) return;
+  
+  
+    // Get current target waypoint
+    const targetWaypoint = autoCarPath[autoCar2State.targetWaypoint];
+    
+    // Calculate direction to target
+    const directionToTarget = new THREE.Vector2(
+      targetWaypoint.x - autoCar2State.position.x,
+      targetWaypoint.z - autoCar2State.position.z
+  );
+  
+  
+  const distanceToTarget = directionToTarget.length();
+  
+  // If we've reached the waypoint (within a small threshold)
+  if (distanceToTarget < 10) {
+      // Move to next waypoint
+      autoCar2State.targetWaypoint = (autoCar2State.targetWaypoint + 1) % autoCarPath.length;
+  }
+  
+  // Calculate ideal heading (angle) to target
+  const targetAngle = Math.atan2(directionToTarget.x, directionToTarget.y);
+  
+  // Calculate difference between current rotation and target angle
+  let rotationDiff = targetAngle - autoCar2State.rotation;
+  
+  // Normalize the difference to be between -PI and PI
+  if (rotationDiff > Math.PI) rotationDiff -= 2 * Math.PI;
+  if (rotationDiff < -Math.PI) rotationDiff += 2 * Math.PI;
+  
+  
+  // Apply rotation - limited by turn speed
+  if (Math.abs(rotationDiff) > 0.01) {
+      const rotationAmount = Math.sign(rotationDiff) * Math.min(autoCarTurnSpeed, Math.abs(rotationDiff));
+      autoCar2State.rotation += rotationAmount;
+      
+      // Normalize rotation to be between 0 and 2*PI
+      if (autoCar2State.rotation > Math.PI * 2) autoCar2State.rotation -= Math.PI * 2;
+      if (autoCar2State.rotation < 0) autoCar2State.rotation += Math.PI * 2;
+  }
+  
+  
+  // Always move forward in the direction the car is facing
+  autoCar2State.position.x += Math.sin(autoCar2State.rotation) * autoCarSpeed;
+  autoCar2State.position.z += Math.cos(autoCar2State.rotation) * autoCarSpeed;
+  
+  // Update the actual car model position and rotation
+  autoCar2.position.set(autoCar2State.position.x, autoCar2State.position.y, autoCar2State.position.z);
+  autoCar2.rotation.y = autoCar2State.rotation;
+  
+  }
+
+
+  function updateAutoCar3(deltaTime) {
+    if (!autoCar3) return;
+  
+  
+    // Get current target waypoint
+    const targetWaypoint = autoCar3Path[autoCar3State.targetWaypoint];
+    
+    // Calculate direction to target
+    const directionToTarget = new THREE.Vector2(
+      targetWaypoint.x - autoCar3State.position.x,
+      targetWaypoint.z - autoCar3State.position.z
+  );
+  
+  
+  const distanceToTarget = directionToTarget.length();
+  
+  // If we've reached the waypoint (within a small threshold)
+  if (distanceToTarget < 10) {
+      // Move to next waypoint
+      autoCar3State.targetWaypoint = (autoCar3State.targetWaypoint + 1) % autoCar3Path.length;
+  }
+  
+  // Calculate ideal heading (angle) to target
+  const targetAngle = Math.atan2(directionToTarget.x, directionToTarget.y);
+  
+  // Calculate difference between current rotation and target angle
+  let rotationDiff = targetAngle - autoCar3State.rotation;
+  
+  // Normalize the difference to be between -PI and PI
+  if (rotationDiff > Math.PI) rotationDiff -= 2 * Math.PI;
+  if (rotationDiff < -Math.PI) rotationDiff += 2 * Math.PI;
+  
+  
+  // Apply rotation - limited by turn speed
+  if (Math.abs(rotationDiff) > 0.01) {
+      const rotationAmount = Math.sign(rotationDiff) * Math.min(autoCarTurnSpeed, Math.abs(rotationDiff));
+      autoCar3State.rotation += rotationAmount;
+      
+      // Normalize rotation to be between 0 and 2*PI
+      if (autoCar3State.rotation > Math.PI * 2) autoCar3State.rotation -= Math.PI * 2;
+      if (autoCar3State.rotation < 0) autoCar3State.rotation += Math.PI * 2;
+  }
+  
+  
+  // Always move forward in the direction the car is facing
+  autoCar3State.position.x += Math.sin(autoCar3State.rotation) * autoCarSpeed;
+  autoCar3State.position.z += Math.cos(autoCar3State.rotation) * autoCarSpeed;
+  
+  // Update the actual car model position and rotation
+  autoCar3.position.set(autoCar3State.position.x, autoCar3State.position.y, autoCar3State.position.z);
+  autoCar3.rotation.y = autoCar3State.rotation;
+  
+  }
+
+// Check collision between player car and automated car
+function checkAutoCarCollision() {
+  if (!playerCar || !autoCar) return false;
+  
+  const playerBox = new THREE.Box3().setFromObject(playerCar);
+  const autoBox = new THREE.Box3().setFromObject(autoCar);
+  const autoBox2 = new THREE.Box3().setFromObject(autoCar2);
+  const autoBox3 = new THREE.Box3().setFromObject(autoCar3);
+  
+  return (playerBox.intersectsBox(autoBox) || playerBox.intersectsBox(autoBox2)|| playerBox.intersectsBox(autoBox3));
+}
+
 
 const npcs = []; 
 const npcLoader = new GLTFLoader();
@@ -603,11 +957,14 @@ npcConfigs.forEach((config, index) => {
     loadNPC(modelPath, config.position, config.scale, config.rotationY);
 });
 
-
 // Camera control
+
 let isTopDownView = false; // Track if the camera is in top-down mode
 const cameraBoundingSize = new THREE.Vector3(2, 2, 2);
 const transitionSpeed = 0.05;
+
+
+
 
 function updateCamera() {
     if (!playerCar) return;
@@ -670,9 +1027,12 @@ let keys = {};
 document.addEventListener("keydown", (event) => keys[event.key.toLowerCase()] = true);
 document.addEventListener("keyup", (event) => keys[event.key.toLowerCase()] = false);
 
+let speed = 0;
+let maxSpeed = 0.18;
+let acceleration = 0.01;
+let turnSpeed = 0.03;
 
 function checkCollision() {
-
     for (const building of buildings.concat(walls)) {
         const carBox = new THREE.Box3().setFromObject(playerCar);
         const buildingBox = new THREE.Box3().setFromObject(building);
@@ -687,20 +1047,26 @@ function checkCollision() {
             return true;
         }
     }
-        
+    const carBox = new THREE.Box3().setFromObject(playerCar);
+    const stopSignBox = new THREE.Box3().setFromObject(stopSign);
+    const stopSign2Box = new THREE.Box3().setFromObject(stopSign2);
+    if (carBox.intersectsBox(stopSignBox) || carBox.intersectsBox(stopSign2Box)) {
+        return true;
+    }
+
+    if (checkAutoCarCollision()) {
+        return true;
+    }
+
     return false;
 }
 
-let speed = 0;
-let maxSpeed = 0.18;
-let acceleration = 0.01;
-let turnSpeed = 0.03;
-
 function updatePlayerCar(deltaTime) {
-    
+
     let nextX = playerCar.position.x;
     let nextZ = playerCar.position.z;
     
+
     // Adjust acceleration & deceleration based on deltaTime
     let adjustedAcceleration = acceleration * deltaTime * 60;
     let adjustedTurnSpeed = turnSpeed * deltaTime * 60; // Scale turning properly
@@ -737,7 +1103,6 @@ function updatePlayerCar(deltaTime) {
         speed = 0;
     }
 
-
     const autoBox = new THREE.Box3().setFromObject(autoCar);
     const autoBox2 = new THREE.Box3().setFromObject(autoCar2);
     const autoBox3 = new THREE.Box3().setFromObject(autoCar3); 
@@ -761,20 +1126,25 @@ function updatePlayerCar(deltaTime) {
     }
 
 
-
-
 }
+
+let lastTime = performance.now();
 function animate() {
     requestAnimationFrame(animate);
-    
-    let deltaTime = clock.getDelta();
+
+    let now = performance.now();
+    let deltaTime = (now - lastTime) / 1000;
+    lastTime = now;
 
     if (playerCar) {
-
       updatePlayerCar(deltaTime);
-
       updateCamera();
     }
+
+    // Update automated car
+    updateAutoCar(deltaTime);
+    updateAutoCar2(deltaTime);
+    updateAutoCar3(deltaTime);
 
     updateTrafficLights(deltaTime);
     renderer.render(scene, camera);
