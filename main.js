@@ -1,50 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-
-let gameStarted = false;
-let didPlayerWin = false;
-let gamePaused = false;
-
-function startGame() {
-    if (gameStarted) return; // Prevent multiple starts
-
-    const introScreen = document.getElementById('introScreen');
-    if (introScreen) {
-        introScreen.style.opacity = '0';
-        setTimeout(() => introScreen.style.display = 'none', 500);
-    }
-
-    const winScreen = document.getElementById('winScreen');
-    if (winScreen) {
-        winScreen.style.display = 'none'; // Hide win screen when restarting
-    }
-
-    gameStarted = true;
-    didPlayerWin = false;
-    gamePaused = false;
-    resetGameObjects();
-    animate(); // Start the game loop
-}
-function playerWins() {
-    // if (didPlayerWin) return; // Prevent multiple triggers
-
-    didPlayerWin = true;
-    gameStarted = false;
-
-    const winScreen = document.getElementById('winScreen');
-    if (winScreen) {
-        winScreen.style.display = 'block';
-    }
-}
-
-function resetGameObjects() {
-    if (playerCar) {
-        playerCar.position.set(0, 0, 0); // Reset player position when restarting game after winning
-    }
-}
-
-
 // Setup Scene, Camera, and Renderer
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -86,8 +42,6 @@ window.addEventListener('keydown', (event) => {
         isDay = !isDay;
         skyMaterial.map = isDay ? dayTexture : nightTexture;
         skyMaterial.needsUpdate = true; // Ensure the material updates
-        didPlayerWin = true; //***CHANGE THIS ONCE WE GET COLLISION DETECTION FOR THE EXIT */
-        // console.log("didDplayerWIn: is true");
     }
     // Adjust lighting
     if (isDay) {
@@ -99,22 +53,7 @@ window.addEventListener('keydown', (event) => {
         ambientLight.intensity = 0.2; // Lower ambient light
         ambientLight.color.set(0x446688); // Soft blue moonlight
     }
-    //hit space to pause:
-    if (event.code === 'Space') {
-        if (!didPlayerWin) {
-            gamePaused = !gamePaused;
-
-            // Show/hide pause screen
-            document.getElementById('pauseScreen').style.display = gamePaused ? 'block' : 'none';
-        }
-
-        // If unpausing, resume game loop
-        if (!gamePaused && gameStarted) {
-            animate();
-        }
-    }
 });
-
 
 // Create Ground (City Base) - changed this to just be the sidewalk for now
 const groundGeometry = new THREE.PlaneGeometry(200, 200);
@@ -151,7 +90,45 @@ const shortRoad = createRoad(50, 0, 0.1, 20, 170,); // Vertical road
 shortRoad.position.z -= 15;
 
 
-// Create Buildings -- this is only here because collision detection uses this fn
+// Create Buildings
+const buildings = [];
+const buildingLoader = new GLTFLoader();
+
+function loadBuilding(modelPath, position, scaleMultiplier = { x: 1, y: 1, z: 1 }) {
+    buildingLoader.load(
+        modelPath,
+        function (gltf) {
+            const building = gltf.scene;
+            building.scale.set(
+                position.scale * scaleMultiplier.x,
+                position.scale * scaleMultiplier.y,
+                position.scale * scaleMultiplier.z
+            );
+            building.position.set(position.x, position.y, position.z);
+            building.rotation.y = position.rotationY;
+            buildings.push(building);
+            scene.add(building);
+            console.log("Building model loaded at:", position);
+        },
+        undefined,
+        function (error) {
+            console.error("Error loading model:", error);
+        }
+    );
+}
+
+// Load all buildings with unified function
+loadBuilding('models/simple_office_building_1.glb', { x: 40, y: 0, z: 79, rotationY: Math.PI / 2, scale: 3 });
+loadBuilding('models/game_ready_city_buildings.glb', { x: 85, y: 0, z: -11, rotationY: 0, scale: 12 });
+loadBuilding('models/realistic_chicago_buildings.glb', { x: -62, y: -3.7, z: 40, rotationY: 0, scale: 0.2 }, { x: 1.5, y: 1, z: 1 });
+loadBuilding('models/realistic_chicago_buildings.glb', { x: -31, y: -3.7, z: 20, rotationY: Math.PI, scale: 0.2 }, { x: 1.5, y: 1, z: 1 });
+loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 33, y: 0, z: 30, rotationY: Math.PI / 2, scale: 0.01 });
+loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 10, y: 0, z: 28, rotationY: -Math.PI / 2, scale: 0.01 });
+loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 33, y: 0, z: -28, rotationY: Math.PI / 2, scale: 0.01 });
+loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 10, y: 0, z: -30, rotationY: -Math.PI / 2, scale: 0.01 });
+loadBuilding('models/low-poly_building.glb', { x: -54, y: 0, z: -82, rotationY: Math.PI, scale: 100 }, { x: 2, y: 1, z: 1 });
+loadBuilding('models/office_building.glb', { x: -60, y: 20, z: 75, rotationY: 0, scale: 0.22 });
+/*
 const buildings = [];
 function createBuilding(x, z, width, height, depth) {
 
@@ -175,7 +152,7 @@ function loadOfficeBuilding(position) {
             
             // Apply rotation based on the provided rotationY value
             office.rotation.y = position.rotationY;
-
+            buildings.push(office);
             scene.add(office);
             console.log("Office model loaded at:", position);
         },
@@ -196,6 +173,7 @@ function loadBrownBuilding(position) {
             office.scale.set(position.scale, position.scale, position.scale); 
             office.position.set(position.x, position.y, position.z);
             office.rotation.y = position.rotationY;
+            buildings.push(office);
             scene.add(office);
             console.log("Office model loaded at:", position);
         },
@@ -216,6 +194,7 @@ function loadChicBuilding(position) {
             office.scale.set(1.5*position.scale, position.scale, position.scale); 
             office.position.set(position.x, position.y, position.z);
             office.rotation.y = position.rotationY;
+            buildings.push(office);
             scene.add(office);
             console.log("Office model loaded at:", position);
         },
@@ -238,6 +217,7 @@ function load3Building(position) {
             office.scale.set(position.scale, position.scale, position.scale);  
             office.position.set(position.x, position.y, position.z);
             office.rotation.y = position.rotationY;
+            buildings.push(office);
             scene.add(office);
             console.log("Office model loaded at:", position);
         },
@@ -264,6 +244,7 @@ function loadWhiteB(position) {
             office.scale.set(2*position.scale, position.scale, position.scale); 
             office.position.set(position.x, position.y, position.z);
             office.rotation.y = position.rotationY;
+            buildings.push(office);
             scene.add(office);
             console.log("Office model loaded at:", position);
         },
@@ -285,6 +266,7 @@ function loadExpensiveOfficeBuilding(position) {
             office.scale.set(position.scale, position.scale, position.scale); 
             office.position.set(position.x, position.y, position.z);
             office.rotation.y = position.rotationY;
+            buildings.push(office);
             scene.add(office);
             console.log("Office model loaded at:", position);
         },
@@ -296,6 +278,7 @@ function loadExpensiveOfficeBuilding(position) {
 }
 const expPos = {x: -60, y: 20, z: 75, rotationY: 0, scale: .22};
 loadExpensiveOfficeBuilding(expPos);
+*/
 
 
 // Create Boundary Walls
@@ -304,7 +287,7 @@ const walls = [];
 function createWall(x, z, width, height, depth) {
     const wallGeometry = new THREE.BoxGeometry(width, height, depth); 
     const wallTexture = new THREE.TextureLoader().load('assets/wood.jpg');
-    const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture }); 
+    const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture}); 
     const wall = new THREE.Mesh(wallGeometry, wallMaterial);
     wall.position.set(x, height / 2, z); // Set position
     scene.add(wall);
@@ -400,7 +383,7 @@ class TrafficLight {
             const lightMaterial = new THREE.MeshStandardMaterial({ emissive: color });
             const light = new THREE.Mesh(lightGeometry, lightMaterial);
             light.position.set(0, 4.2 - index * 0.6, 0.5);
-            // this.group.add(light);
+            this.group.add(light);
             this.lights[color] = light;
         });
         
@@ -440,9 +423,10 @@ trafficLights.push(new TrafficLight(18.5, 3.5, -Math.PI / 2, true));
 trafficLights.push(new TrafficLight(18.5, -3.5, 0, true));
 trafficLights.push(new TrafficLight(11.5, 3.5, Math.PI, true));
 
-// trafficLights.forEach(light => scene.add(light.group));
+trafficLights.forEach(light => scene.add(light.group));
 
 // Traffic Light Cycle
+const clock = new THREE.Clock();
 let timeElapsed = 0;
 function updateTrafficLights(deltaTime) {
     timeElapsed += deltaTime;
@@ -480,19 +464,16 @@ function updateTrafficLights(deltaTime) {
 }
 
 // Create Player Car
-/*const carGeometry = new THREE.BoxGeometry(2, 1, 4);
-const carMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-const playerCar = new THREE.Mesh(carGeometry, carMaterial);*/
-const startPosition = { x: 0, y: 0.5, z: 0 };
-//playerCar.position.set(startPosition.x, startPosition.y, startPosition.z);
+const startPosition = { x: 0, y: 0.2, z: 0 };
 
+/*
 let playerCar;
 const loader = new GLTFLoader();
 
-loader.load( 'models/car_model/scene.gltf', function ( gltfScene ) {
+loader.load( 'models/player_car/scene.gltf', function ( gltfScene ) {
   playerCar = gltfScene.scene;
-  playerCar.position.set(0, 0.5, 0);
-  playerCar.scale.set(2, 2, 2);
+  playerCar.position.set(startPosition.x, startPosition.y, startPosition.z);
+  playerCar.scale.set(1, 1, 1);
   playerCar.rotation.y = Math.PI;
   scene.add( playerCar );
 
@@ -501,34 +482,174 @@ loader.load( 'models/car_model/scene.gltf', function ( gltfScene ) {
 	console.error( error );
 
 } );
+ */
+let playerCar;
+const cars = []; 
+const loader = new GLTFLoader();
 
+// Function to load a car model
+function loadCar(modelPath, position, scale, rotationY = Math.PI, isPlayerCar = false) {
+    loader.load(modelPath, function (gltfScene) {
+        const car = gltfScene.scene;
+        car.position.set(position.x, position.y, position.z);
+        car.scale.set(scale, scale, scale);
+        car.rotation.y = rotationY;
+        scene.add(car);
+        cars.push(car); 
+        
+        if (isPlayerCar && !playerCar) {
+            playerCar = car;
+        }
+    }, undefined, function (error) {
+        console.error(error);
+    });
+}
+
+// Car models list
+const carModels = [
+    'models/player_car/scene.gltf',
+    'models/car_model_1/scene.gltf',
+    'models/car_model_2/scene.gltf',
+    'models/car_model_3/scene.gltf',
+    'models/car_model_4/scene.gltf',
+    'models/car_model_5/scene.gltf'
+];
+
+
+const carConfigs = [
+    { position: { x: 0, y: 0.2, z: 0 }, scale: 1 },  // Player car
+    { position: { x: -5, y: 0.2, z: 0 }, scale: 1.75 },
+    { position: { x: 10, y: 0.2, z: 0 }, scale: 1.25 },
+    { position: { x: 0, y: 0.2, z: 5 }, scale: 1.25 },
+    { position: { x: 0, y: 0.2, z: -15 }, scale: 0.9 },
+    { position: { x: 15, y: 0.2, z: 0 }, scale: 1.25 }
+];
+
+carConfigs.forEach((config, index) => {
+    const modelPath = carModels[index % carModels.length]; 
+    const isPlayerCar = index === 0; // First car is the player car
+    loadCar(modelPath, config.position, config.scale, Math.PI, isPlayerCar);
+});
+
+// `playerCar` is assigned asynchronously, so it may not be available immediately
+setTimeout(() => {
+    if (!playerCar && cars.length > 0) {
+        playerCar = cars[0];
+    }
+}, 1000); // Delay check to wait for loading
+
+const npcs = []; 
+const npcLoader = new GLTFLoader();
+
+// Function to load an NPC model
+function loadNPC(modelPath, position, scale, rotationY = 0) {
+    npcLoader.load(modelPath, function (gltfScene) {
+        const npc = gltfScene.scene;
+        npc.position.set(position.x, position.y, position.z);
+        npc.scale.set(scale, scale, scale);
+        npc.rotation.y = rotationY;
+        scene.add(npc);
+        npcs.push(npc); 
+    }, undefined, function (error) {
+        console.error(error);
+    });
+}
+
+// List of NPC models
+const npcModels = [
+    'models/npc1/scene.gltf',
+    'models/npc2/scene.gltf',
+    'models/npc3/scene.gltf',
+    'models/npc4/scene.gltf',
+    'models/npc5/scene.gltf',
+    'models/npc6/scene.gltf'
+];
+
+// Example usage for multiple NPCs with different positions and scales
+const npcConfigs = [
+    { position: { x: 5, y: 0.2, z: 5 }, scale: 1, rotationY: 0 },
+    { position: { x: -10, y: 0.2, z: 10 }, scale: 0.4, rotationY: 0 },
+    { position: { x: 8, y: 1.25, z: -8 }, scale: 0.6, rotationY: Math.PI },
+    { position: { x: -12, y: 0.19, z: -6 }, scale: 0.01, rotationY: 0 },
+    { position: { x: 15, y: 0.2, z: 3 }, scale: 1, rotationY: 0 },
+    { position: { x: -7, y: 0.2, z: -15 }, scale: 1, rotationY: 0 }
+];
+
+// Load different NPC models at different positions
+npcConfigs.forEach((config, index) => {
+    const modelPath = npcModels[index % npcModels.length]; // Cycle through models
+    loadNPC(modelPath, config.position, config.scale, config.rotationY);
+});
+
+
+// Camera control
+let isTopDownView = false; // Track if the camera is in top-down mode
+const cameraBoundingSize = new THREE.Vector3(2, 2, 2);
+const transitionSpeed = 0.05;
 
 function updateCamera() {
-  if (!playerCar) return;
-  // Define the fixed offset in the car's local space (Behind and Above)
-  const offset = new THREE.Vector3(0, 2, -4); // (x, height, distance behind)
-  // Create a translation matrix to apply the offset in local space
-  const translationMatrix = new THREE.Matrix4().makeTranslation(offset.x, offset.y, offset.z);
-  // Apply the translation relative to the car's world transform
-  const cameraMatrix = playerCar.matrixWorld.clone().multiply(translationMatrix);
-  // Extract the new camera position from the transformed matrix
-  const cameraPosition = new THREE.Vector3().setFromMatrixPosition(cameraMatrix);
-  // Smoothly move the camera for a natural follow effect
-  camera.position.lerp(cameraPosition, 0.1);
-  // Make the camera look at the car
-  camera.lookAt(playerCar.position);
+    if (!playerCar) return;
+
+    // Define the fixed offset in the car's local space (Behind and Above)
+    const offset = new THREE.Vector3(0, 2, -4); // (x, height, distance behind)
+    const translationMatrix = new THREE.Matrix4().makeTranslation(offset.x, offset.y, offset.z);
+    const desiredCameraMatrix = playerCar.matrixWorld.clone().multiply(translationMatrix);
+    const desiredCameraPosition = new THREE.Vector3().setFromMatrixPosition(desiredCameraMatrix);
+
+    // Create a virtual bounding box around the desired camera position
+    const cameraBox = new THREE.Box3().setFromCenterAndSize(desiredCameraPosition, cameraBoundingSize);
+
+    // Check for collisions with buildings and walls
+    let isObstructed = false;
+    for (const obj of buildings.concat(walls)) {
+        const objBox = new THREE.Box3().setFromObject(obj);
+        if (cameraBox.intersectsBox(objBox)) {
+            isObstructed = true;
+            break; // Stop checking once we detect an obstruction
+        }
+    }
+
+    if (isObstructed) {
+        // Switch to top-down view if obstructed
+        if (!isTopDownView) {
+            isTopDownView = true;
+        }
+
+        // Align top-down view with the player's car direction
+        const topDownOffset = new THREE.Vector3(0, 10, 0); // Move above the car
+        const topDownPosition = playerCar.position.clone().add(topDownOffset);
+
+        // Get the car's forward direction
+        const carDirection = new THREE.Vector3();
+        playerCar.getWorldDirection(carDirection);
+        carDirection.setY(0); // Ignore vertical direction (we only care about horizontal rotation)
+
+        // Adjust camera to look slightly ahead in the direction of the car
+        const lookAtTarget = playerCar.position.clone().add(carDirection);
+
+        // Smoothly move to top-down position
+        camera.position.lerp(topDownPosition, transitionSpeed);
+        camera.lookAt(lookAtTarget);
+
+    } else {
+        // If no obstruction, switch back to third-person view
+        if (isTopDownView) {
+            isTopDownView = false;
+        }
+
+        // Smooth transition back to third-person camera
+        camera.position.lerp(desiredCameraPosition, transitionSpeed);
+        camera.lookAt(playerCar.position);
+    }
 }
 
 let keys = {};
 document.addEventListener("keydown", (event) => keys[event.key.toLowerCase()] = true);
 document.addEventListener("keyup", (event) => keys[event.key.toLowerCase()] = false);
 
-let speed = 0;
-let maxSpeed = 0.18;
-let acceleration = 0.01;
-let turnSpeed = 0.03;
 
-function checkCollision(newX, newZ) {
+function checkCollision() {
+
     for (const building of buildings.concat(walls)) {
         const carBox = new THREE.Box3().setFromObject(playerCar);
         const buildingBox = new THREE.Box3().setFromObject(building);
@@ -543,64 +664,68 @@ function checkCollision(newX, newZ) {
             return true;
         }
     }
+        
     return false;
 }
 
-function updatePlayerCar() {
+let speed = 0;
+let maxSpeed = 0.18;
+let acceleration = 0.01;
+let turnSpeed = 0.03;
+
+function updatePlayerCar(deltaTime) {
+    
     let nextX = playerCar.position.x;
     let nextZ = playerCar.position.z;
     
-    if (keys["w"] || keys["arrowup"]) speed = Math.min(speed + acceleration, maxSpeed);
-    else if (keys["s"] || keys["arrowdown"]) speed = Math.max(speed - acceleration, -maxSpeed / 2);
-    else speed *= 0.98;
+    // Adjust acceleration & deceleration based on deltaTime
+    let adjustedAcceleration = acceleration * deltaTime * 60;
+    let adjustedTurnSpeed = turnSpeed * deltaTime * 60; // Scale turning properly
+    let adjustedDrag = Math.pow(0.98, deltaTime * 60); // Keep drag frame-rate independent
     
-    if (speed !== 0) {
-        if (keys["a"] || keys["arrowleft"]) playerCar.rotation.y += turnSpeed * (speed > 0 ? 1 : -1);
-        if (keys["d"] || keys["arrowright"]) playerCar.rotation.y -= turnSpeed * (speed > 0 ? 1 : -1);
+    // Apply acceleration and braking
+    if (keys["w"] || keys["arrowup"]) {
+        speed = Math.min(speed + adjustedAcceleration, maxSpeed);
+    } else if (keys["s"] || keys["arrowdown"]) {
+        speed = Math.max(speed - adjustedAcceleration, -maxSpeed / 2);
+    } else {
+        speed *= adjustedDrag; // Apply friction dynamically
     }
     
-    nextX += Math.sin(playerCar.rotation.y) * speed;
-    nextZ += Math.cos(playerCar.rotation.y) * speed;
+    // Apply turning based on speed direction
+    if (speed !== 0) {
+        if (keys["a"] || keys["arrowleft"]) {
+            playerCar.rotation.y += adjustedTurnSpeed * (speed > 0 ? 1 : -1);
+        }
+        if (keys["d"] || keys["arrowright"]) {
+            playerCar.rotation.y -= adjustedTurnSpeed * (speed > 0 ? 1 : -1);
+        }
+    }
     
-    if (!checkCollision(nextX, nextZ)) {
+    // Update movement (scaled by deltaTime)
+    nextX += Math.sin(playerCar.rotation.y) * speed * deltaTime * 60;
+    nextZ += Math.cos(playerCar.rotation.y) * speed * deltaTime * 60;
+    
+    if (!checkCollision()) {
         playerCar.position.x = nextX;
         playerCar.position.z = nextZ;
     } else {
         playerCar.position.set(startPosition.x, startPosition.y, startPosition.z);
         speed = 0;
     }
+        
 }
-
-window.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-        startGame();
-    }
-});
-
-//Event listener for clicking the start button
-document.getElementById('startButton').addEventListener('click', startGame);
-document.getElementById('restartButton').addEventListener('click', startGame);
-
-let lastTime = performance.now();
 function animate() {
-    // if (!gameStarted) return;
-    if (!gameStarted || gamePaused) return;
-
     requestAnimationFrame(animate);
-
-    let now = performance.now();
-    let deltaTime = (now - lastTime) / 1000;
-    lastTime = now;
+    
+    let deltaTime = clock.getDelta();
 
     if (playerCar) {
-      updatePlayerCar();
+      updatePlayerCar(deltaTime);
+      updateCamera();
     }
 
     updateTrafficLights(deltaTime);
     renderer.render(scene, camera);
-
-    if(didPlayerWin) {
-        playerWins();
-    }
-}
-//   animate();
+  }
+  animate();
