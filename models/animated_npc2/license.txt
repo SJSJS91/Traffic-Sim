@@ -1,0 +1,11 @@
+Model Information:
+* title:	Retro Person Animated Walking
+* source:	https://sketchfab.com/3d-models/retro-person-animated-walking-dedeccbca4dd436e9ee33b9f48768dc0
+* author:	SilentGamer55 (https://sketchfab.com/SilentGamer55)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Retro Person Animated Walking" (https://sketchfab.com/3d-models/retro-person-animated-walking-dedeccbca4dd436e9ee33b9f48768dc0) by SilentGamer55 (https://sketchfab.com/SilentGamer55) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
