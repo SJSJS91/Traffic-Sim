@@ -806,7 +806,7 @@ const mixers = []; // store animation mixers
 const animatedNpcLoader = new GLTFLoader();
 
 // NPC state initialization
-let animatedNpcsState = [];
+//let animatedNpcsState = [];
 
 function loadAnimatedNpc(modelPath, position, scale, rotationY = 0) {
     animatedNpcLoader.load(modelPath, function (gltf) {
@@ -818,11 +818,13 @@ function loadAnimatedNpc(modelPath, position, scale, rotationY = 0) {
         animatedNpcs.push(npc); // Store in NPCs array
 
         // Initialize the state for this NPC
+        /*
         const npcState = {
             position: npc.position.clone(),
             targetWaypoint: 1,  // The next waypoint after the current one
         };
         animatedNpcsState.push(npcState); // Add state to the state array
+        */
 
         // Ensure the model has animations
         if (gltf.animations.length > 0) {
@@ -852,6 +854,7 @@ loadAnimatedNpc('models/animated_npc5/scene.gltf', { x: 23, y: 0.2, z: 25 }, 0.5
 
 
 // Define paths for each NPC (in counterclockwise or back-and-forth directions)
+/*
 const npcPaths = [
     // Pedestrian 1 Path (counterclockwise loop)
     [
@@ -885,8 +888,8 @@ const npcPaths = [
         new THREE.Vector3(23, 0.2, 47),   // Waypoint 1
     ]
 ];
-
-
+*/
+/*
 function updatePedestrianMovement(deltaTime) {
     if (animatedNpcs.length === 0) return;  // Wait until NPCs are fully loaded
 
@@ -936,7 +939,7 @@ function updatePedestrianMovement(deltaTime) {
         }
     }
 }
-
+*/
 
 // Camera control
 let isTopDownView = false; // Track if the camera is in top-down mode
@@ -1150,7 +1153,7 @@ function animate() {
     }
 
 
-    updatePedestrianMovement(deltaTime);  // Update pedestrian movement
+    //updatePedestrianMovement(deltaTime);  // Update pedestrian movement
 
 
     // Update all animation mixers
