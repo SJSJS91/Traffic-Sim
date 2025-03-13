@@ -4,31 +4,17 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 let gameStarted = false;
 let didPlayerWin = false;
 let gameReady = false;
-// document.addEventListener("DOMContentLoaded", function () {
-//     console.log("✅ DOM fully loaded, checking collisionScreen...");
-
-//     const collisionScreen = document.getElementById("collisionScreen");
-//     if (collisionScreen) {
-//         collisionScreen.style.display = 'none';
-//     }
-
-//     if (!collisionScreen) {
-//         console.error("❌ ERROR: collisionScreen element not found in DOM!");
-//     } else {
-//         console.log("✅ collisionScreen found in DOM.");
-//     }
-// });
-
  
  function startGame() {
      if (gameStarted) return; //prevent multiple starts
+
+     console.log("game is being started");
      
      const introScreen = document.getElementById('introScreen');
      if (introScreen) {
          introScreen.style.opacity = '50';
          setTimeout(() => introScreen.style.display = 'none', 500);
      }
- 
      //hide win screen if restart
      const winScreen = document.getElementById('winScreen');
      if (winScreen) {
@@ -90,7 +76,7 @@ document.body.appendChild(renderer.domElement);
 
 // Set Camera Position
 camera.position.set(0, 10, 20);
-// camera.position.set(0, 150, 0);
+camera.position.set(0, 150, 0);
 camera.lookAt(0, 0, 0);
 
 // Lighting
@@ -165,16 +151,32 @@ scene.add(ground);
 function createRoad(x, z, y, width, height) {
     const roadGeometry = new THREE.PlaneGeometry(width, height);
 
-    //const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
-    const roadTexture = new THREE.TextureLoader().load('assets/asphalt2.jpg');
-    const roadMaterial = new THREE.MeshStandardMaterial({ map: roadTexture });
+    // Load texture
+    const roadTexture = new THREE.TextureLoader().load('assets/asphalt2.jpg', (texture) => {
+        texture.wrapS = THREE.RepeatWrapping;  // Tile horizontally
+        texture.wrapT = THREE.RepeatWrapping;  // Tile vertically
+        texture.repeat.set(width / 10, height / 10); // Adjust tiling based on size
+    });
 
-    const road = new THREE.Mesh(roadGeometry, roadMaterial);
+    const roadMaterial = new THREE.MeshStandardMaterial({ map: roadTexture });
+    // const normalMap = textureLoader.load('path_to_your_texture/asphalt_normal.jpg');
+    // const roughnessMap = textureLoader.load('path_to_your_texture/asphalt_roughness.jpg');
+
+    const asphaltMaterial = new THREE.MeshStandardMaterial({
+        map: roadTexture,
+        // normalMap: normalMap,
+        // roughnessMap: roughnessMap,
+        roughness: 3.0, // Adjust based on your texture
+        metalness: 0.0 // Asphalt is non-metallic
+    });
+
+    const road = new THREE.Mesh(roadGeometry, asphaltMaterial);
     road.position.set(x, y, z);
     road.rotation.x = -Math.PI / 2;
     scene.add(road);
     return road;
 }
+
 
 createRoad(0, 0, 0.2, 200, 20); // Horizontal road 
 createRoad(0, -60, 0.2, 200, 20); // Horizontal road
@@ -187,22 +189,25 @@ shortRoad.position.z -= 15;
 
 
 // Create Buildings
-
 const buildings = [];
 const buildingLoader = new GLTFLoader();
 
-function loadBuilding(modelPath, position, scaleMultiplier = { x: 1, y: 1, z: 1 }) {
+function loadBuilding(modelPath, position) {
     buildingLoader.load(
         modelPath,
         function (gltf) {
             const building = gltf.scene;
             building.scale.set(
-                position.scale * scaleMultiplier.x,
-                position.scale * scaleMultiplier.y,
-                position.scale * scaleMultiplier.z
+                position.scale.x,
+                position.scale.y,
+                position.scale.z
             );
             building.position.set(position.x, position.y, position.z);
-            building.rotation.y = position.rotationY;
+            building.rotation.set(
+                position.rotationX || 0,  // X-axis rotation
+                position.rotationY || 0,  // Y-axis rotation
+                position.rotationZ || 0   // Z-axis rotation
+            );
             buildings.push(building);
             scene.add(building);
             console.log("Building model loaded at:", position);
@@ -214,17 +219,41 @@ function loadBuilding(modelPath, position, scaleMultiplier = { x: 1, y: 1, z: 1 
     );
 }
 
-// Load all buildings with unified function
-loadBuilding('models/simple_office_building_1.glb', { x: 40, y: 0, z: 79, rotationY: Math.PI / 2, scale: 3 });
-loadBuilding('models/game_ready_city_buildings.glb', { x: 85, y: 0, z: -11, rotationY: 0, scale: 12 });
-loadBuilding('models/realistic_chicago_buildings.glb', { x: -62, y: -3.7, z: 40, rotationY: 0, scale: 0.2 }, { x: 1.5, y: 1, z: 1 });
-loadBuilding('models/realistic_chicago_buildings.glb', { x: -31, y: -3.7, z: 20, rotationY: Math.PI, scale: 0.2 }, { x: 1.5, y: 1, z: 1 });
-loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 33, y: 0, z: 30, rotationY: Math.PI / 2, scale: 0.01 });
-loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 10, y: 0, z: 28, rotationY: -Math.PI / 2, scale: 0.01 });
-loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 33, y: 0, z: -28, rotationY: Math.PI / 2, scale: 0.01 });
-loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 10, y: 0, z: -30, rotationY: -Math.PI / 2, scale: 0.01 });
-loadBuilding('models/low-poly_building.glb', { x: -54, y: 0, z: -82, rotationY: Math.PI, scale: 100 }, { x: 2, y: 1, z: 1 });
-loadBuilding('models/office_building.glb', { x: -60, y: 20, z: 75, rotationY: 0, scale: 0.22 });
+// Load all buildings with correct scaling
+loadBuilding('models/simple_office_building_1.glb', { x: 40, y: 0, z: 79, rotationY: Math.PI / 2, scale: { x: 1, y: 3, z: 4.5 } });
+loadBuilding('models/game_ready_city_buildings.glb', { x: 85, y: 0, z: -11, rotationY: 0, scale: { x: 12, y: 12, z: 12 } });
+loadBuilding('models/realistic_chicago_buildings.glb', { x: -62, y: -3.7, z: 40, rotationY: 0, scale: { x: 1.5 * 0.2, y: 0.2, z: 0.2 } });
+loadBuilding('models/realistic_chicago_buildings.glb', { x: -31, y: -3.7, z: 20, rotationY: Math.PI, scale: { x: 1.5 * 0.2, y: 0.2, z: 0.2 } });
+loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 33, y: 0, z: 30, rotationY: Math.PI / 2, scale: { x: 0.01, y: 0.01, z: 0.01 } });
+loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 10, y: 0, z: 28, rotationY: -Math.PI / 2, scale: { x: 0.01, y: 0.01, z: 0.01 } });
+loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 33, y: 0, z: -28, rotationY: Math.PI / 2, scale: { x: 0.01, y: 0.01, z: 0.01 } });
+loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 10, y: 0, z: -30, rotationY: -Math.PI / 2, scale: { x: 0.01, y: 0.01, z: 0.01 } });
+loadBuilding('models/low-poly_building.glb', { x: -54, y: 0, z: -82, rotationY: Math.PI, scale: { x: 200, y: 100, z: 100 } });
+loadBuilding('models/office_building.glb', { x: -60, y: 20, z: 75, rotationY: 0, scale: { x: 0.22, y: 0.22, z: 0.13 } });
+loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 80, y: 0, z: 45, rotationY: 0, scale: { x: 0.01, y: 0.01, z: 0.01 } });
+loadBuilding('models/low_poly__dumpsters.glb', { x: 87, y: 0, z: 17, rotationY: Math.PI, scale: { x: 2, y: 2, z: 2 } });
+loadBuilding('models/low_poly__dumpsters.glb', { x: -30, y: 0, z: -14, rotationY: Math.PI/8, scale: { x: 2, y: 2, z: 2 } });
+loadBuilding('models/low_poly__pallets.glb', { x: 70, y: 0, z: 17, rotationY: Math.PI/4, scale: { x: 3, y: 3, z: 3 } });
+loadBuilding('models/futuristic_building.glb', { x: -50, y: -0.5, z: -20, rotationY: 0, scale: { x: 2, y: 3, z: 2 } });
+
+loadBuilding('models/avenue_road_street_low_poly.glb', { x: 2, y: 0, z: -77, rotationY: 0, scale: { x: .1, y: .1, z: .1 } });
+loadBuilding('models/fire_hydrant_low_poly.glb', { x: 65, y: 0, z: -75, rotationY: 0, scale: { x: 1, y: 1, z: 1 } });
+loadBuilding('models/danger_barrier_proops.glb', { x: -5, y: 1.5, z: -73, rotationY: 0, scale: { x: 2, y: 2, z: 2 } });
+loadBuilding('models/photoscan_low-poly_construction_sand_pile.glb', { x: 30, y: 0, z: -85, rotationY: 0, scale: { x: 2.5, y: 3.5, z: 2.5 } });
+loadBuilding('models/chain_link_fence_low_poly_version.glb', { x: 22, y: 0, z: -75, rotationY: 0, scale: { x: 2, y: 1, z: 2 } });
+loadBuilding('models/low_poly__pallets.glb', { x: 20, y: 0, z: -83, rotationY: Math.PI/4, scale: { x: 3, y: 3, z: 3 } });
+loadBuilding('models/avika_street_food_cart.glb', { x: 77, y: 0, z: -73, rotationY: 0, scale: { x: 3, y: 3, z: 3 } });
+loadBuilding('models/free_gmc_motorhome_reimagined_low_poly.glb', { x: 77, y: 3, z: -85, rotationY: -Math.PI/2, scale: { x: 2.5, y: 2.5, z: 2.5 } });
+
+loadBuilding('models/traffic_cone.glb', { x: 50, y: 1.5, z: -84, rotationY: 0, scale: { x: 20, y: 20, z: 20 } });
+loadBuilding('models/traffic_cone.glb', { x: 45, y: 1.5, z: -84, rotationY: 0, scale: { x: 20, y: 20, z: 20 } });
+loadBuilding('models/traffic_cone.glb', { x: 55, y: 1.5, z: -84, rotationY: 0, scale: { x: 20, y: 20, z: 20 } });
+
+
+
+
+
+
 
 // Create Boundary Walls
 const walls = [];
@@ -510,7 +539,7 @@ function updateTrafficLights(deltaTime) {
 }
 
 // Create Player Car
-const startPosition = { x: -90, y: 0.2, z: 0};
+const startPosition = { x: -90, y: 0.4, z: 0 };
 
 
 let playerCar;
@@ -1484,7 +1513,6 @@ function animate() {
     if(checkCollision()){
         console.log("❌ Collision detected");
         showCollisionScreen();
-        // gameStarted = false; // Prevent further movement
     }
     
     requestAnimationFrame(animate);
@@ -1508,5 +1536,6 @@ function animate() {
 
     updateTrafficLights(deltaTime);
     renderer.render(scene, camera);
+
   }
   animate();
