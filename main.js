@@ -3,6 +3,22 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 let gameStarted = false;
 let didPlayerWin = false;
+let gameReady = false;
+// document.addEventListener("DOMContentLoaded", function () {
+//     console.log("✅ DOM fully loaded, checking collisionScreen...");
+
+//     const collisionScreen = document.getElementById("collisionScreen");
+//     if (collisionScreen) {
+//         collisionScreen.style.display = 'none';
+//     }
+
+//     if (!collisionScreen) {
+//         console.error("❌ ERROR: collisionScreen element not found in DOM!");
+//     } else {
+//         console.log("✅ collisionScreen found in DOM.");
+//     }
+// });
+
  
  function startGame() {
      if (gameStarted) return; //prevent multiple starts
@@ -18,18 +34,24 @@ let didPlayerWin = false;
      if (winScreen) {
          winScreen.style.display = 'none';
      }
-    //  document.getElementById("collisionScreen").style.display = "none";
+
+     const collisionScreen = document.getElementById('collisionScreen');
+     if (collisionScreen) {
+         collisionScreen.style.display = 'none';
+     }
+ 
  
      gameStarted = true;
      didPlayerWin = false; 
-     playerCar.position.set(0, 0.2, 0);
+     gameReady = false;
 
-     if (!checkCollision()) {
-        playerCar.position.set(startPosition.x, startPosition.y, startPosition.z);
-        speed = 0;
-    }
+    setTimeout(() => {
+        gameReady = true;
+        console.log("✅ Collision detection enabled!");
+    }, 3000); // 3 second delay
 
-     animate(); //start the game
+    playerCar.position.set(startPosition.x, startPosition.y, startPosition.z);
+    animate(); //start the game
  }
  function playerWins() {
  
@@ -44,21 +66,18 @@ let didPlayerWin = false;
  }
 
  function showCollisionScreen() {
+    console.log("showing the screen now");
     const collisionScreen = document.getElementById("collisionScreen");
     if (collisionScreen) {
-        collisionScreen.style.display = "flex";
+        gameStarted = false; // Stop the game
+        collisionScreen.style.display = "none"; // Reset display
+        
+        setTimeout(() => {
+            collisionScreen.style.display = "flex"; // Ensure screen appears
+        }, 10); // Small delay to force CSS reflow
     }
-    
-    gameStarted = false; // Stop the game
 }
 
-document.getElementById("retryButton").addEventListener("click", function () {
-    const collisionScreen = document.getElementById("collisionScreen");
-    if (collisionScreen) {
-        collisionScreen.style.display = "none"; // Hide the screen
-    }
-    startGame(); // Restart the game
-});
 
  
 
@@ -891,11 +910,12 @@ let acceleration = 0.01;
 let turnSpeed = 0.03;
 
 function checkCollision() {
+    if (!gameReady) return false;
+
     for (const building of buildings.concat(walls)) {
         const carBox = new THREE.Box3().setFromObject(playerCar);
         const buildingBox = new THREE.Box3().setFromObject(building);
         if (carBox.intersectsBox(buildingBox)) {
-            showCollisionScreen();
             return true;
         }
     }
@@ -903,7 +923,6 @@ function checkCollision() {
         light.updateBoundingBox(); // Update bounding box before checking collision
         const carBox = new THREE.Box3().setFromObject(playerCar);
         if (carBox.intersectsBox(light.boundingBox)) {
-            showCollisionScreen();
             return true;
         }
     }
@@ -911,12 +930,10 @@ function checkCollision() {
     const stopSignBox = new THREE.Box3().setFromObject(stopSign);
     const stopSign2Box = new THREE.Box3().setFromObject(stopSign2);
     if (carBox.intersectsBox(stopSignBox) || carBox.intersectsBox(stopSign2Box)) {
-        showCollisionScreen();
         return true;
     }
 
     if (checkAutoCarCollision()) {
-        showCollisionScreen();
         return true;
     }
 
@@ -992,10 +1009,17 @@ function updatePlayerCar(deltaTime) {
 
 let lastTime = performance.now();
 function animate() {
+    // console.log("animate is running");
     if (!gameStarted) return;
 
     if(didPlayerWin){
         playerWins();
+    }
+
+    if(checkCollision()){
+        console.log("❌ Collision detected");
+        showCollisionScreen();
+        // gameStarted = false; // Prevent further movement
     }
     
     requestAnimationFrame(animate);
