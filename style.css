@@ -1,0 +1,104 @@
+/* General Page Styling */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(to bottom, #1e1e1e, #0f0f0f); /* Dark background */
+    color: white;
+}
+
+/* Fullscreen overlay */
+#introScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85); /* Dark transparent background */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 10;
+}
+
+/* Title Styling */
+h1 {
+    font-size: 40px;
+    color: #ffcc00; /* Yellow for visibility */
+    text-shadow: 3px 3px 5px rgba(255, 255, 255, 0.3);
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 20px;
+    color: #dddddd;
+    margin-bottom: 20px;
+}
+
+/* Traffic Light Styling */
+#trafficLights {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.light {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+}
+
+.red { background: #ff4d4d; }
+.yellow { background: #ffcc00; }
+.green { background: #33cc33; }
+
+/* Start Button */
+#startButton {
+    background: linear-gradient(to right, #ff4d4d, #ffcc00, #33cc33); /* Traffic light gradient */
+    color: white;
+    padding: 15px 30px;
+    font-size: 20px;
+    border: none;
+    border-radius: 25px; /* Rounded corners */
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+
+#startButton:hover {
+    background: linear-gradient(to right, #e63e3e, #e6b800, #29a329);
+    transform: scale(1.05);
+}
+
+
+#winScreen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    display: none; /* Hidden initially */
+}
+
+#winScreen button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+#winScreen button:hover {
+    background-color: #45a049;
+}
