@@ -18,6 +18,7 @@ let didPlayerWin = false;
      if (winScreen) {
          winScreen.style.display = 'none';
      }
+    //  document.getElementById("collisionScreen").style.display = "none";
  
      gameStarted = true;
      didPlayerWin = false; 
@@ -41,6 +42,24 @@ let didPlayerWin = false;
          winScreen.style.display = 'block';
      }
  }
+
+ function showCollisionScreen() {
+    const collisionScreen = document.getElementById("collisionScreen");
+    if (collisionScreen) {
+        collisionScreen.style.display = "flex";
+    }
+    
+    gameStarted = false; // Stop the game
+}
+
+document.getElementById("retryButton").addEventListener("click", function () {
+    const collisionScreen = document.getElementById("collisionScreen");
+    if (collisionScreen) {
+        collisionScreen.style.display = "none"; // Hide the screen
+    }
+    startGame(); // Restart the game
+});
+
  
 
 // Setup Scene, Camera, and Renderer
@@ -876,6 +895,7 @@ function checkCollision() {
         const carBox = new THREE.Box3().setFromObject(playerCar);
         const buildingBox = new THREE.Box3().setFromObject(building);
         if (carBox.intersectsBox(buildingBox)) {
+            showCollisionScreen();
             return true;
         }
     }
@@ -883,6 +903,7 @@ function checkCollision() {
         light.updateBoundingBox(); // Update bounding box before checking collision
         const carBox = new THREE.Box3().setFromObject(playerCar);
         if (carBox.intersectsBox(light.boundingBox)) {
+            showCollisionScreen();
             return true;
         }
     }
@@ -890,10 +911,12 @@ function checkCollision() {
     const stopSignBox = new THREE.Box3().setFromObject(stopSign);
     const stopSign2Box = new THREE.Box3().setFromObject(stopSign2);
     if (carBox.intersectsBox(stopSignBox) || carBox.intersectsBox(stopSign2Box)) {
+        showCollisionScreen();
         return true;
     }
 
     if (checkAutoCarCollision()) {
+        showCollisionScreen();
         return true;
     }
 
