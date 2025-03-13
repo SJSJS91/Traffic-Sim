@@ -1,13 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Team Project</title>
-		<style>
-			body { margin: 0; }
-		</style>
-	</head>
-	<body>
-		<script type="module" src="/main.js"></script>
-	</body>
+<head>
+    <meta charset="utf-8">
+    <title>Escape the City!</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link to external CSS -->
+</head>
+<body>
+
+    <!-- Intro overlay -->
+    <div id="introScreen">
+        <div id="trafficLights">
+            <div class="light red"></div>
+            <div class="light yellow"></div>
+            <div class="light green"></div>
+        </div>
+        
+        <h1>🚗 Escape the City! 🏙️</h1>
+        <h2>Find the exit tunnel without hitting any obstacles!</h2>
+        <p>Click below to start your escape.</p>
+		<p>(Please allow a few seconds for our city to load in!)</p>
+
+        <button id="startButton">Start</button>
+    </div>
+
+	<!-- Win Screen (Hidden Initially) -->
+	<div id="winScreen" style="display: none;">
+		<h1>🎉 You Escaped the City! 🚗💨</h1>
+		<p>Congratulations! You found the exit tunnel.</p>
+		<button id="restartButton">Play Again</button>
+	</div>
+
+	<!-- Collision Screen (Hidden by Default) -->
+	<div id="collisionScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+	background-color: rgba(0, 0, 0, 0.8); color: white; flex-direction: column;
+	align-items: center; justify-content: center; text-align: center; font-size: 24px;">
+		<h1>Ouch! You hit something!</h1>
+		<p>Be careful next time!</p>
+		<button id="retryButton" style="font-size: 20px; padding: 10px 20px; cursor: pointer;">Try Again</button>
+	</div>
+
+    <script type="module" src="/main.js"></script> <!-- Load your game logic -->
+
+</body>
 </html>
