@@ -22,6 +22,8 @@ let gameReady = false;
  
  function startGame() {
      if (gameStarted) return; //prevent multiple starts
+
+     console.log("game is being started");
      
      const introScreen = document.getElementById('introScreen');
      if (introScreen) {
@@ -149,6 +151,10 @@ scene.add(skySphere);
 //event listener for clicking the start/restart button
 document.getElementById('startButton').addEventListener('click', startGame);
 document.getElementById('restartButton').addEventListener('click', startGame);
+document.getElementById('retryButton').addEventListener('click', startGame);
+// document.getElementById("retryButton").addEventListener("click", function () {
+//     console.log("🔄 Retry button clicked!");
+// });
 
 // Create Ground (City Base) - changed this to just be the sidewalk for now
 const groundGeometry = new THREE.PlaneGeometry(200, 200);
