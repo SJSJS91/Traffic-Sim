@@ -1,6 +1,48 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+let gameStarted = false;
+let didPlayerWin = false;
+ 
+ function startGame() {
+     if (gameStarted) return; //prevent multiple starts
+     
+     const introScreen = document.getElementById('introScreen');
+     if (introScreen) {
+         introScreen.style.opacity = '0';
+         setTimeout(() => introScreen.style.display = 'none', 500);
+     }
+ 
+     //hide win screen if restart
+     const winScreen = document.getElementById('winScreen');
+     if (winScreen) {
+         winScreen.style.display = 'none';
+     }
+ 
+     gameStarted = true;
+     didPlayerWin = false; 
+     playerCar.position.set(0, 0.2, 0);
+
+     if (!checkCollision()) {
+        playerCar.position.set(startPosition.x, startPosition.y, startPosition.z);
+        speed = 0;
+    }
+
+     animate(); //start the game
+ }
+ function playerWins() {
+ 
+     didPlayerWin = true;
+     gameStarted = false;
+ 
+     //show win screen
+     const winScreen = document.getElementById('winScreen');
+     if (winScreen) {
+         winScreen.style.display = 'block';
+     }
+ }
+ 
+
 // Setup Scene, Camera, and Renderer
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -46,6 +88,7 @@ scene.add(skySphere);
          isDay = !isDay;
          skyMaterial.map = isDay ? dayTexture : nightTexture;
          skyMaterial.needsUpdate = true; // Ensure the material updates
+         didPlayerWin = true;
      }
      // Adjust lighting
      if (isDay) {
@@ -58,6 +101,16 @@ scene.add(skySphere);
          ambientLight.color.set(0x446688); // Soft blue moonlight
      }
  });
+ 
+ window.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        startGame();
+    }
+});
+
+//event listener for clicking the start/restart button
+document.getElementById('startButton').addEventListener('click', startGame);
+document.getElementById('restartButton').addEventListener('click', startGame);
 
 // Create Ground (City Base) - changed this to just be the sidewalk for now
 const groundGeometry = new THREE.PlaneGeometry(200, 200);
@@ -133,161 +186,6 @@ loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 33, y: 0, z:
 loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 10, y: 0, z: -30, rotationY: -Math.PI / 2, scale: 0.01 });
 loadBuilding('models/low-poly_building.glb', { x: -54, y: 0, z: -82, rotationY: Math.PI, scale: 100 }, { x: 2, y: 1, z: 1 });
 loadBuilding('models/office_building.glb', { x: -60, y: 20, z: 75, rotationY: 0, scale: 0.22 });
-/*
-
-const buildings = [];
-function createBuilding(x, z, width, height, depth) {
-
-    const buildingGeometry = new THREE.BoxGeometry(width, height, depth);
-    const buildingTexture = new THREE.TextureLoader().load('assets/bldng3.JPG');
-    const buildingMaterial = new THREE.MeshStandardMaterial({ map: buildingTexture });
-    // const buildingMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
-    const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
-    building.position.set(x, height / 2, z);
-    // scene.add(building);
-    buildings.push(building);
-
-}
-
-const buildingLoader = new GLTFLoader();
-function loadOfficeBuilding(position) {
-    buildingLoader.load(
-        'models/simple_office_building_1.glb',
-        function (gltf) {
-            const office = gltf.scene;
-            office.scale.set(1.75, position.scale, 4.5);  // Apply scaling to all axes
-            office.position.set(position.x, position.y, position.z);
-            
-            // Apply rotation based on the provided rotationY value
-            office.rotation.y = position.rotationY;
-
-            scene.add(office);
-            buildings.push(office);
-            console.log("Office model loaded at:", position);
-        },
-        undefined,
-        function (error) {
-            console.error("Error loading model:", error);
-        }
-    );
-}
-const pos = {x: 40, y: 0, z: 79, rotationY: Math.PI/2, scale: 3};
-loadOfficeBuilding(pos);
-
-function loadBrownBuilding(position) {
-    buildingLoader.load(
-        'models/game_ready_city_buildings.glb',
-        function (gltf) {
-            const office = gltf.scene;
-            office.scale.set(position.scale, position.scale, position.scale); 
-            office.position.set(position.x, position.y, position.z);
-            office.rotation.y = position.rotationY;
-            scene.add(office);
-            buildings.push(office);
-            console.log("Office model loaded at:", position);
-        },
-        undefined,
-        function (error) {
-            console.error("Error loading model:", error);
-        }
-    );
-}
-const brownBpos = {x: 85, y: 0, z: -11, rotationY: 0, scale: 12};
-loadBrownBuilding(brownBpos);
-
-function loadChicBuilding(position) {
-    buildingLoader.load(
-        'models/realistic_chicago_buildings.glb',
-        function (gltf) {
-            const office = gltf.scene;
-            office.scale.set(1.5*position.scale, position.scale, position.scale); 
-            office.position.set(position.x, position.y, position.z);
-            office.rotation.y = position.rotationY;
-            scene.add(office);
-            buildings.push(office);
-            console.log("Office model loaded at:", position);
-        },
-        undefined,
-        function (error) {
-            console.error("Error loading model:", error);
-        }
-    );
-}
-const chicagopos = {x: -62, y: -3.7, z: 40, rotationY: 0, scale: .2};
-loadChicBuilding(chicagopos);
-const chicagopos2 = {x: -31, y: -3.7, z: 20, rotationY: Math.PI, scale: .2};
-loadChicBuilding(chicagopos2);
-
-function load3Building(position) {
-    buildingLoader.load(
-        'models/3_buildings_-_ww2_carentan_inspired.glb',
-        function (gltf) {
-            const office = gltf.scene;
-            office.scale.set(position.scale, position.scale, position.scale);  
-            office.position.set(position.x, position.y, position.z);
-            office.rotation.y = position.rotationY;
-            scene.add(office);
-            buildings.push(office);
-            console.log("Office model loaded at:", position);
-        },
-        undefined,
-        function (error) {
-            console.error("Error loading model:", error);
-        }
-    );
-}
-const building3pos = {x: 33, y: 0, z: 30, rotationY: Math.PI/2, scale: .01};
-load3Building(building3pos);
-const building3pos2 = {x: 10, y: 0, z: 28, rotationY: -Math.PI/2, scale: .01};
-load3Building(building3pos2);
-const building3pos3 = {x: 33, y: 0, z: -28, rotationY: Math.PI/2, scale: .01};
-load3Building(building3pos3);
-const building3pos4 = {x: 10, y: 0, z: -30, rotationY: -Math.PI/2, scale: .01};
-load3Building(building3pos4);
-
-function loadWhiteB(position) {
-    buildingLoader.load(
-        'models/low-poly_building.glb',
-        function (gltf) {
-            const office = gltf.scene;
-            office.scale.set(2*position.scale, position.scale, position.scale); 
-            office.position.set(position.x, position.y, position.z);
-            office.rotation.y = position.rotationY;
-            scene.add(office);
-            buildings.push(office);
-            console.log("Office model loaded at:", position);
-        },
-        undefined,
-        function (error) {
-            console.error("Error loading model:", error);
-        }
-    );
-}
-const buildingWhitepos = {x: -54, y: 0, z: -82, rotationY: Math.PI, scale: 100};
-loadWhiteB(buildingWhitepos);
-
-
-function loadExpensiveOfficeBuilding(position) {
-    buildingLoader.load(
-        'models/office_building.glb',
-        function (gltf) {
-            const office = gltf.scene;
-            office.scale.set(position.scale, position.scale, position.scale); 
-            office.position.set(position.x, position.y, position.z);
-            office.rotation.y = position.rotationY;
-            scene.add(office);
-            buildings.push(office);
-            console.log("Office model loaded at:", position);
-        },
-        undefined,
-        function (error) {
-            console.error("Error loading model:", error);
-        }
-    );
-}
-const expPos = {x: -60, y: 20, z: 75, rotationY: 0, scale: .22};
-loadExpensiveOfficeBuilding(expPos);
-*/
 
 // Create Boundary Walls
 const walls = [];
@@ -580,65 +478,6 @@ loader.load( 'models/player_car/scene.gltf', function ( gltfScene ) {
 	console.error( error );
 
 } );
- 
-
-/*
-let playerCar;
-const cars = []; 
-const loader = new GLTFLoader();
-
-// Function to load a car model
-function loadCar(modelPath, position, scale, rotationY = Math.PI / 2, isPlayerCar = false) {
-    loader.load(modelPath, function (gltfScene) {
-        const car = gltfScene.scene;
-        car.position.set(position.x, position.y, position.z);
-        car.scale.set(scale, scale, scale);
-        car.rotation.y = rotationY;
-        scene.add(car);
-        cars.push(car); 
-        
-        if (isPlayerCar && !playerCar) {
-            playerCar = car;
-        }
-    }, undefined, function (error) {
-        console.error(error);
-    });
-}
-
-
-// Car models list
-const carModels = [
-    'models/player_car/scene.gltf',
-    'models/car_model_1/scene.gltf',
-    'models/car_model_2/scene.gltf',
-    'models/car_model_3/scene.gltf',
-    'models/car_model_4/scene.gltf',
-    'models/car_model_5/scene.gltf'
-];
-
-
-const carConfigs = [
-    { position: { x: -90, y: 0.2, z: 0 }, scale: 1 },  // Player car
-    { position: { x: -20, y: 0.2, z: 20 }, scale: 1.75 },
-    { position: { x: -20, y: 0.2, z: -60 }, scale: 1.25 },
-    { position: { x: 2, y: 0.2, z: 0 }, scale: 1.25 },
-    { position: { x: 0, y: 0.2, z: -15 }, scale: 0.9 },
-    { position: { x: 15, y: 0.2, z: 0 }, scale: 1.25 }
-];
-
-carConfigs.forEach((config, index) => {
-    const modelPath = carModels[index % carModels.length]; 
-    const isPlayerCar = index === 0; // First car is the player car
-    loadCar(modelPath, config.position, config.scale, Math.PI, isPlayerCar);
-});
-
-// `playerCar` is assigned asynchronously, so it may not be available immediately
-setTimeout(() => {
-    if (!playerCar && cars.length > 0) {
-        playerCar = cars[0];
-    }
-}, 1000); // Delay check to wait for loading
-*/
 
 
 // Automated Car
@@ -1130,6 +969,12 @@ function updatePlayerCar(deltaTime) {
 
 let lastTime = performance.now();
 function animate() {
+    if (!gameStarted) return;
+
+    if(didPlayerWin){
+        playerWins();
+    }
+    
     requestAnimationFrame(animate);
 
     let now = performance.now();

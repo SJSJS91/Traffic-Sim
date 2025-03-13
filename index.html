@@ -1,13 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Team Project</title>
-		<style>
-			body { margin: 0; }
-		</style>
-	</head>
-	<body>
-		<script type="module" src="/main.js"></script>
-	</body>
+<head>
+    <meta charset="utf-8">
+    <title>Escape the City!</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link to external CSS -->
+</head>
+<body>
+
+    <!-- Intro overlay -->
+    <div id="introScreen">
+        <div id="trafficLights">
+            <div class="light red"></div>
+            <div class="light yellow"></div>
+            <div class="light green"></div>
+        </div>
+        
+        <h1>🚗 Escape the City! 🏙️</h1>
+        <h2>Find the exit tunnel without hitting any obstacles!</h2>
+        <p>Click below to start your escape.</p>
+
+        <button id="startButton">Start</button>
+    </div>
+
+	<!-- Win Screen (Hidden Initially) -->
+	<div id="winScreen" style="display: none;">
+		<h1>🎉 You Escaped the City! 🚗💨</h1>
+		<p>Congratulations! You found the exit tunnel.</p>
+		<button id="restartButton">Play Again</button>
+	</div>
+
+
+    <script type="module" src="/main.js"></script> <!-- Load your game logic -->
+
+</body>
 </html>
