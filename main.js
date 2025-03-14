@@ -229,7 +229,7 @@ loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 10, y: 0, z:
 loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 33, y: 0, z: -28, rotationY: Math.PI / 2, scale: { x: 0.01, y: 0.01, z: 0.01 } });
 loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 10, y: 0, z: -30, rotationY: -Math.PI / 2, scale: { x: 0.01, y: 0.01, z: 0.01 } });
 loadBuilding('models/low-poly_building.glb', { x: -54, y: 0, z: -82, rotationY: Math.PI, scale: { x: 200, y: 100, z: 100 } });
-loadBuilding('models/office_building.glb', { x: -60, y: 20, z: 75, rotationY: 0, scale: { x: 0.22, y: 0.22, z: 0.13 } });
+loadBuilding('models/office_building.glb', { x: -60, y: 20, z: 75, rotationY: 0, scale: { x: 0.22, y: .22, z: 0.13 } });
 loadBuilding('models/3_buildings_-_ww2_carentan_inspired.glb', { x: 80, y: 0, z: 45, rotationY: 0, scale: { x: 0.01, y: 0.01, z: 0.01 } });
 loadBuilding('models/low_poly__dumpsters.glb', { x: 87, y: 0, z: 17, rotationY: Math.PI, scale: { x: 2, y: 2, z: 2 } });
 loadBuilding('models/low_poly__dumpsters.glb', { x: -30, y: 0, z: -14, rotationY: Math.PI/8, scale: { x: 2, y: 2, z: 2 } });
@@ -1324,20 +1324,26 @@ let maxSpeed = 0.18;
 let acceleration = 0.01;
 let turnSpeed = 0.03;
 
+
+function createBoundingBoxHelper(box, color) {
+    const helper = new THREE.Box3Helper(box, color);
+    scene.add(helper);
+    return helper;
+  }
+
 function checkCollision() {
 
     if (!gameReady) return false;
 
 
-    let i = 0;
     for (const building of buildings.concat(walls)) {
         const carBox = new THREE.Box3().setFromObject(playerCar);
         const buildingBox = new THREE.Box3().setFromObject(building);
         const center = buildingBox.getCenter(new THREE.Vector3()); // Get the center
         const size = buildingBox.getSize(new THREE.Vector3()); // Get the original size
 
-        if (i == 4 || i == 3) {
-            const scaleFactor = new THREE.Vector3(0.84, 1, 0.74); // Example scale factors (x, y, z)
+        if (building.position.y == -3.7) {
+            const scaleFactor = new THREE.Vector3(0.83, 1, 0.72); // Example scale factors (x, y, z)
 
             // Scale the size components independently
             const newSize = size.multiply(scaleFactor);
@@ -1349,8 +1355,8 @@ function checkCollision() {
             );
         }
 
-        if (i == 9) {
-            const scaleFactor = new THREE.Vector3(0.925, 1, 0.75); // Example scale factors (x, y, z)
+        if (building.position.x == -60) {
+            const scaleFactor = new THREE.Vector3(0.93, 1, 0.75); // Example scale factors (x, y, z)
 
             // Scale the size components independently
             const newSize = size.multiply(scaleFactor);
@@ -1362,8 +1368,8 @@ function checkCollision() {
             );
         }
 
-        if (i == 1 || i == 2) {
-            const scaleFactor = new THREE.Vector3(0.84, 1, 0.8); // Example scale factors (x, y, z)
+        if (building.position.x == 40) {
+            const scaleFactor = new THREE.Vector3(0.85, 1, 0.85); // Example scale factors (x, y, z)
 
             // Scale the size components independently
             const newSize = size.multiply(scaleFactor);
@@ -1375,15 +1381,50 @@ function checkCollision() {
             );
         }
 
-        i++;
+        if (building.position.x == 85) {
+            const scaleFactor = new THREE.Vector3(0.9, 1, 0.9); // Example scale factors (x, y, z)
+
+            // Scale the size components independently
+            const newSize = size.multiply(scaleFactor);
+
+            // Set new min and max, keeping the center the same
+            buildingBox.set(
+                center.clone().sub(newSize.clone().multiplyScalar(0.5)), // New min
+                center.clone().add(newSize.clone().multiplyScalar(0.5))  // New max
+            );
+        }
+
+        if (building.position.x == -50) {
+            const scaleFactor = new THREE.Vector3(0.72, 1, 0.5); // Example scale factors (x, y, z)
+
+            // Visualize different bounding boxes
+            //const originalHelper = createBoundingBoxHelper(buildingBox, 0xff0000); // Red
+
+            // Scale the size components independently
+            const newSize = size.multiply(scaleFactor);
+
+            // Set new min and max, keeping the center the same
+            buildingBox.set(
+                center.clone().sub(newSize.clone().multiplyScalar(0.5)), // New min
+                center.clone().add(newSize.clone().multiplyScalar(0.5))  // New max
+            );
+        }
+
+        
+        const carBox2 = new THREE.Box3().setFromObject(playerCar);
+        if (tunnelData && tunnelData.bbox.intersectsBox(carBox2)) {
+            
+        } else {
+            
+        }
+        
+
         if (carBox.intersectsBox(buildingBox)) {
-            i = 0;
             return true;
         }
         
     }
 
-    i = 0;
 
     for (let light of trafficLights) {
         light.updateBoundingBox(); // Update bounding box before checking collision
