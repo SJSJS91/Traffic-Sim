@@ -1233,11 +1233,11 @@ const npcModels = [
 
 // Data for multiple NPCs with different positions and scales
 const npcConfigs = [
-    { position: { x: 65, y: 0.2, z: -15 }, scale: 1, rotationY: -Math.PI/2 },
+    { position: { x: 62, y: 0.2, z: 45 }, scale: 1, rotationY: -Math.PI/2 },
     { position: { x: -20, y: 0.2, z: 75 }, scale: 0.4, rotationY: Math.PI },
     { position: { x: 10, y: 1.25, z: 75 }, scale: 0.6, rotationY: 0 },
-    { position: { x: 8, y: -0.01, z: -75 }, scale: 0.01, rotationY: -Math.PI/2 },
-    { position: { x: 63, y: 0.2, z: -72 }, scale: 1, rotationY: 0 },
+    { position: { x: 8, y: -0.01, z: -72 }, scale: 0.01, rotationY: -Math.PI/2 },
+    { position: { x: 67, y: 0.2, z: -78 }, scale: 1, rotationY: 0 },
     { position: { x: -17, y: 0.2, z: -72 }, scale: 1, rotationY: 0 }
 ];
 
@@ -1292,8 +1292,8 @@ loadAnimatedNpc('models/animated_npc1/scene.gltf', { x: -75, y: 0.2, z: -45 }, 0
 // path from (-75,0.2,-45) to (-20,0.2,-45) to (-20,0.2,-15) to (-75,0.2,-15) back to (-75,0.2,-45) clockwise loop
 loadAnimatedNpc('models/animated_npc2/scene.gltf', { x: -78, y: 1.0, z: 17 }, 0.02, Math.PI/2); 
 // path from (-78,1,17) to (-18,1,17) to (-18,1,47) to (-78,1,47) back to (-78,1,17) clockwise loop
-loadAnimatedNpc('models/animated_npc3/scene.gltf', { x: 63, y: 0.2, z: 47 }, 0.95, Math.PI);
-// path from (63,0.2,47) to (63,0.2,14) to (97,0.2,14) to (97,0.2,47) back to (63,0.2,47) clockwise loop
+loadAnimatedNpc('models/animated_npc3/scene.gltf', { x: 65, y: 0.2, z: -20 }, 0.95, Math.PI);
+// path from (65,0.2,-20) to (65,0.2,-49) to (90,0.2,-49) to (90,0.2,-11) to (65,0.2,-11) back to (65,0.2,-49) clockwise loop
 loadAnimatedNpc('models/animated_npc4/scene.gltf', { x: 20, y: 0.2, z: -25 }, 12, 0);
 // path from (20,0.2,-25) to (20,0.2,-13) to (20,0.2,-47) to (20,0.2,-13) to (20,0.2,-47) back and forth
 loadAnimatedNpc('models/animated_npc5/scene.gltf', { x: 23, y: 0.2, z: 25 }, 0.5, 0); 
@@ -1457,13 +1457,14 @@ function createNpcBoundingBox(npc) {
     const npcBox = new THREE.Box3().setFromCenterAndSize(npcPosition, npcBoundingSize);
     
     // Optionally, you can visualize the bounding box as a wireframe
+    /*
     const geometry = new THREE.BoxGeometry(npcBoundingSize.x, npcBoundingSize.y, npcBoundingSize.z);
     const material = new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.5, transparent: true });
     const wireframe = new THREE.LineSegments(new THREE.EdgesGeometry(geometry), material);
     
     wireframe.position.copy(npcPosition);  // Position the wireframe at the NPC's position
     scene.add(wireframe);  // Add the wireframe to the scene (for visualization purposes)
-
+*/
     return npcBox;  // Return the bounding box for collision detection
 }
 
@@ -1689,7 +1690,7 @@ function animate() {
 
     if (playerCar) {
       updatePlayerCar(deltaTime);
-      updateCamera();
+      //updateCamera();
     }
 
 
