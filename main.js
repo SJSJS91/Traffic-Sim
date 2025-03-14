@@ -112,7 +112,6 @@ scene.add(skySphere);
          isDay = !isDay;
          skyMaterial.map = isDay ? dayTexture : nightTexture;
          skyMaterial.needsUpdate = true; // Ensure the material updates
-         didPlayerWin = true;
      }
      // Adjust lighting
      if (isDay) {
@@ -1505,6 +1504,7 @@ let lastTime = performance.now();
 function animate() {
     // console.log("animate is running");
     if (!gameStarted) return;
+
 
     if(didPlayerWin){
         playerWins();
