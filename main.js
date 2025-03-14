@@ -1488,144 +1488,6 @@ function updatePedestrianMovement(deltaTime) {
 
 
 // Camera control
-
-// NPC state initialization
-//let animatedNpcsState = [];
-
-function loadAnimatedNpc(modelPath, position, scale, rotationY = 0) {
-    animatedNpcLoader.load(modelPath, function (gltf) {
-        const npc = gltf.scene;
-        npc.position.set(position.x, position.y, position.z);
-        npc.scale.set(scale, scale, scale);
-        npc.rotation.y = rotationY; // Apply rotation
-        scene.add(npc);
-        animatedNpcs.push(npc); // Store in NPCs array
-
-        // Initialize the state for this NPC
-        /*
-        const npcState = {
-            position: npc.position.clone(),
-            targetWaypoint: 1,  // The next waypoint after the current one
-        };
-        animatedNpcsState.push(npcState); // Add state to the state array
-        */
-
-        // Ensure the model has animations
-        if (gltf.animations.length > 0) {
-            const mixer = new THREE.AnimationMixer(npc);
-            const action = mixer.clipAction(gltf.animations[0]); // Play walking animation
-            action.play();
-            mixers.push(mixer);
-            npc.userData.mixer = mixer;
-        } else {
-            console.warn("No animations found in model:", modelPath);
-        }
-    }, undefined, function (error) {
-        console.error("Error loading NPC model:", error);
-    });
-}
-
-loadAnimatedNpc('models/animated_npc1/scene.gltf', { x: -75, y: 0.2, z: -45 }, 0.009, Math.PI/2); 
-// path from (-75,0.2,-45) to (-20,0.2,-45) to (-20,0.2,-15) to (-75,0.2,-15) back to (-75,0.2,-45) clockwise loop
-loadAnimatedNpc('models/animated_npc2/scene.gltf', { x: -78, y: 1.0, z: 17 }, 0.02, Math.PI/2); 
-// path from (-78,1,17) to (-18,1,17) to (-18,1,47) to (-78,1,47) back to (-78,1,17) clockwise loop
-loadAnimatedNpc('models/animated_npc3/scene.gltf', { x: 65, y: 0.2, z: -20 }, 0.95, Math.PI);
-// path from (65,0.2,-20) to (65,0.2,-49) to (90,0.2,-49) to (90,0.2,-11) to (65,0.2,-11) back to (65,0.2,-49) clockwise loop
-loadAnimatedNpc('models/animated_npc4/scene.gltf', { x: 20, y: 0.2, z: -25 }, 12, 0);
-// path from (20,0.2,-25) to (20,0.2,-13) to (20,0.2,-47) to (20,0.2,-13) to (20,0.2,-47) back and forth
-loadAnimatedNpc('models/animated_npc5/scene.gltf', { x: 23, y: 0.2, z: 25 }, 0.5, 0); 
-// path from (23,0.2,15) to (23,0.2,47) to (23,0.2,13) to (23,0.2,47) to (23,0.2,13) back and forth
-
-
-// Define paths for each NPC (in counterclockwise or back-and-forth directions)
-/*
-const npcPaths = [
-    // Pedestrian 1 Path (counterclockwise loop)
-    [
-        new THREE.Vector3(-75, 0.2, -45),  // Starting point
-        new THREE.Vector3(-20, 0.2, -45),  // Waypoint 1
-        new THREE.Vector3(-20, 0.2, -15),  // Waypoint 2
-        new THREE.Vector3(-75, 0.2, -15),  // Waypoint 3
-    ],
-    // Pedestrian 2 Path (counterclockwise loop)
-    [
-        new THREE.Vector3(-78, 1.0, 17),  // Starting point
-        new THREE.Vector3(-18, 1.0, 17),  // Waypoint 1
-        new THREE.Vector3(-18, 1.0, 47),  // Waypoint 2
-        new THREE.Vector3(-78, 1.0, 47),  // Waypoint 3
-    ],
-    // Pedestrian 3 Path (counterclockwise loop)
-    [
-        new THREE.Vector3(63, 0.2, 47),   // Starting point
-        new THREE.Vector3(63, 0.2, 14),   // Waypoint 1
-        new THREE.Vector3(97, 0.2, 14),   // Waypoint 2
-        new THREE.Vector3(97, 0.2, 47),   // Waypoint 3
-    ],
-    // Pedestrian 4 Path (back and forth)
-    [
-        new THREE.Vector3(20, 0.2, -25),  // Starting point
-        new THREE.Vector3(20, 0.2, -13),  // Waypoint 1
-    ],
-    // Pedestrian 5 Path (back and forth)
-    [
-        new THREE.Vector3(23, 0.2, 15),   // Starting point
-        new THREE.Vector3(23, 0.2, 47),   // Waypoint 1
-    ]
-];
-*/
-/*
-function updatePedestrianMovement(deltaTime) {
-    if (animatedNpcs.length === 0) return;  // Wait until NPCs are fully loaded
-
-    for (let i = 0; i < animatedNpcs.length; i++) {
-        const path = npcPaths[i];  // Get the path for the current pedestrian
-        const speed = 0.1;  // Speed at which the pedestrian moves along the path
-
-        const targetWaypoint = path[animatedNpcsState[i].targetWaypoint];
-
-        // Calculate direction to target
-        const directionToTarget = new THREE.Vector2(
-            targetWaypoint.x - animatedNpcsState[i].position.x,
-            targetWaypoint.z - animatedNpcsState[i].position.z
-        );
-
-        const distanceToTarget = directionToTarget.length();
-
-        // If we've reached the waypoint (within a small threshold)
-        if (distanceToTarget < 0.5) {  // Threshold is smaller for better accuracy
-            // Stop at the waypoint
-            animatedNpcsState[i].position.set(targetWaypoint.x, targetWaypoint.y, targetWaypoint.z);
-
-            // Rotate the pedestrian 90 or 180 degrees depending on the path
-            if (path.length > 2) {
-                // Rotate 90 degrees for counterclockwise loop
-                animatedNpcs[i].rotation.y -= Math.PI/2;
-            } else {
-                // Rotate 180 degrees for back-and-forth path
-                animatedNpcs[i].rotation.y += Math.PI;  // Rotate 180 degrees
-            }
-
-            // Move to next waypoint
-            animatedNpcsState[i].targetWaypoint = (animatedNpcsState[i].targetWaypoint + 1) % path.length;
-        } else {
-            // Move towards the target waypoint
-            const moveVector = directionToTarget.normalize().multiplyScalar(speed * deltaTime);
-            animatedNpcsState[i].position.add(moveVector);
-
-            // Update the actual pedestrian position in the scene
-            // Here, we apply the state position to the actual NPC model's position
-            animatedNpcs[i].position.set(animatedNpcsState[i].position.x, animatedNpcsState[i].position.y, animatedNpcsState[i].position.z);
-        }
-
-        // Optionally, play animations based on movement (walk, idle, etc.)
-        if (animatedNpcs[i].userData.mixer) {
-            animatedNpcs[i].userData.mixer.update(deltaTime);
-        }
-    }
-}
-*/
-
-// Camera control
 let isTopDownView = false; // Track if the camera is in top-down mode
 const cameraBoundingSize = new THREE.Vector3(2, 2, 2);
 const transitionSpeed = 0.05;
@@ -1959,11 +1821,10 @@ function animate() {
 
     if (playerCar) {
       updatePlayerCar(deltaTime);
-      //updateCamera();
+      updateCamera();
     }
 
 
-    //updatePedestrianMovement(deltaTime);  // Update pedestrian movement
 
 
     // Update all animation mixers
