@@ -1415,7 +1415,7 @@ function checkCollision() {
             console.log("hit the exit tunnel");
             didPlayerWin = true;
         } else {
-            console.log("not at the exit tunnel")
+            // console.log("not at the exit tunnel")
         }
         
 
