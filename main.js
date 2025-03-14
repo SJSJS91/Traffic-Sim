@@ -1676,9 +1676,10 @@ function checkCollision() {
         
         const carBox2 = new THREE.Box3().setFromObject(playerCar);
         if (tunnelData && tunnelData.bbox.intersectsBox(carBox2)) {
-            
+            console.log("hit the exit tunnel");
+            didPlayerWin = true;
         } else {
-            
+            console.log("not at the exit tunnel")
         }
         
 
