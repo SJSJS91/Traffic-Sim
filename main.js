@@ -279,8 +279,6 @@ const wallHeight = 10;
   createWall(100.5, 0, wallDepth, wallHeight, citySize); //right
 
 
-
-
 //making the exit
 function createExitTunnel(x, z, width, height, depth) {
     const tunnelGeometry = new THREE.BoxGeometry(width, height, depth);
@@ -1208,7 +1206,7 @@ function checkAutoCarCollision() {
 const npcs = []; 
 const npcLoader = new GLTFLoader();
 
-// Function to load an NPC model
+// Function to load a static NPC model
 function loadNPC(modelPath, position, scale, rotationY = 0) {
     npcLoader.load(modelPath, function (gltfScene) {
         const npc = gltfScene.scene;
@@ -1232,14 +1230,14 @@ const npcModels = [
     'models/npc6/scene.gltf'
 ];
 
-// Example usage for multiple NPCs with different positions and scales
+// Data for multiple NPCs with different positions and scales
 const npcConfigs = [
-    { position: { x: 5, y: 0.2, z: 5 }, scale: 1, rotationY: 0 },
-    { position: { x: -10, y: 0.2, z: 10 }, scale: 0.4, rotationY: 0 },
-    { position: { x: 8, y: 1.25, z: -8 }, scale: 0.6, rotationY: Math.PI },
-    { position: { x: -12, y: 0.19, z: -6 }, scale: 0.01, rotationY: 0 },
-    { position: { x: 15, y: 0.2, z: 3 }, scale: 1, rotationY: 0 },
-    { position: { x: -7, y: 0.2, z: -15 }, scale: 1, rotationY: 0 }
+    { position: { x: 62, y: 0.2, z: 45 }, scale: 1, rotationY: -Math.PI/2 },
+    { position: { x: -20, y: 0.2, z: 75 }, scale: 0.4, rotationY: Math.PI },
+    { position: { x: 10, y: 1.25, z: 75 }, scale: 0.6, rotationY: 0 },
+    { position: { x: 8, y: -0.01, z: -72 }, scale: 0.01, rotationY: -Math.PI/2 },
+    { position: { x: 67, y: 0.2, z: -78 }, scale: 1, rotationY: 0 },
+    { position: { x: -17, y: 0.2, z: -72 }, scale: 1, rotationY: 0 }
 ];
 
 // Load different NPC models at different positions
@@ -1248,27 +1246,161 @@ npcConfigs.forEach((config, index) => {
     loadNPC(modelPath, config.position, config.scale, config.rotationY);
 });
 
-// Camera control
+// animated pedestrians
+const animatedNpcs = [];
+const mixers = []; // store animation mixers
+const animatedNpcLoader = new GLTFLoader();
 
+// NPC state initialization
+//let animatedNpcsState = [];
+
+function loadAnimatedNpc(modelPath, position, scale, rotationY = 0) {
+    animatedNpcLoader.load(modelPath, function (gltf) {
+        const npc = gltf.scene;
+        npc.position.set(position.x, position.y, position.z);
+        npc.scale.set(scale, scale, scale);
+        npc.rotation.y = rotationY; // Apply rotation
+        scene.add(npc);
+        animatedNpcs.push(npc); // Store in NPCs array
+
+        // Initialize the state for this NPC
+        /*
+        const npcState = {
+            position: npc.position.clone(),
+            targetWaypoint: 1,  // The next waypoint after the current one
+        };
+        animatedNpcsState.push(npcState); // Add state to the state array
+        */
+
+        // Ensure the model has animations
+        if (gltf.animations.length > 0) {
+            const mixer = new THREE.AnimationMixer(npc);
+            const action = mixer.clipAction(gltf.animations[0]); // Play walking animation
+            action.play();
+            mixers.push(mixer);
+            npc.userData.mixer = mixer;
+        } else {
+            console.warn("No animations found in model:", modelPath);
+        }
+    }, undefined, function (error) {
+        console.error("Error loading NPC model:", error);
+    });
+}
+
+loadAnimatedNpc('models/animated_npc1/scene.gltf', { x: -75, y: 0.2, z: -45 }, 0.009, Math.PI/2); 
+// path from (-75,0.2,-45) to (-20,0.2,-45) to (-20,0.2,-15) to (-75,0.2,-15) back to (-75,0.2,-45) clockwise loop
+loadAnimatedNpc('models/animated_npc2/scene.gltf', { x: -78, y: 1.0, z: 17 }, 0.02, Math.PI/2); 
+// path from (-78,1,17) to (-18,1,17) to (-18,1,47) to (-78,1,47) back to (-78,1,17) clockwise loop
+loadAnimatedNpc('models/animated_npc3/scene.gltf', { x: 65, y: 0.2, z: -20 }, 0.95, Math.PI);
+// path from (65,0.2,-20) to (65,0.2,-49) to (90,0.2,-49) to (90,0.2,-11) to (65,0.2,-11) back to (65,0.2,-49) clockwise loop
+loadAnimatedNpc('models/animated_npc4/scene.gltf', { x: 20, y: 0.2, z: -25 }, 12, 0);
+// path from (20,0.2,-25) to (20,0.2,-13) to (20,0.2,-47) to (20,0.2,-13) to (20,0.2,-47) back and forth
+loadAnimatedNpc('models/animated_npc5/scene.gltf', { x: 23, y: 0.2, z: 25 }, 0.5, 0); 
+// path from (23,0.2,15) to (23,0.2,47) to (23,0.2,13) to (23,0.2,47) to (23,0.2,13) back and forth
+
+
+// Define paths for each NPC (in counterclockwise or back-and-forth directions)
+/*
+const npcPaths = [
+    // Pedestrian 1 Path (counterclockwise loop)
+    [
+        new THREE.Vector3(-75, 0.2, -45),  // Starting point
+        new THREE.Vector3(-20, 0.2, -45),  // Waypoint 1
+        new THREE.Vector3(-20, 0.2, -15),  // Waypoint 2
+        new THREE.Vector3(-75, 0.2, -15),  // Waypoint 3
+    ],
+    // Pedestrian 2 Path (counterclockwise loop)
+    [
+        new THREE.Vector3(-78, 1.0, 17),  // Starting point
+        new THREE.Vector3(-18, 1.0, 17),  // Waypoint 1
+        new THREE.Vector3(-18, 1.0, 47),  // Waypoint 2
+        new THREE.Vector3(-78, 1.0, 47),  // Waypoint 3
+    ],
+    // Pedestrian 3 Path (counterclockwise loop)
+    [
+        new THREE.Vector3(63, 0.2, 47),   // Starting point
+        new THREE.Vector3(63, 0.2, 14),   // Waypoint 1
+        new THREE.Vector3(97, 0.2, 14),   // Waypoint 2
+        new THREE.Vector3(97, 0.2, 47),   // Waypoint 3
+    ],
+    // Pedestrian 4 Path (back and forth)
+    [
+        new THREE.Vector3(20, 0.2, -25),  // Starting point
+        new THREE.Vector3(20, 0.2, -13),  // Waypoint 1
+    ],
+    // Pedestrian 5 Path (back and forth)
+    [
+        new THREE.Vector3(23, 0.2, 15),   // Starting point
+        new THREE.Vector3(23, 0.2, 47),   // Waypoint 1
+    ]
+];
+*/
+/*
+function updatePedestrianMovement(deltaTime) {
+    if (animatedNpcs.length === 0) return;  // Wait until NPCs are fully loaded
+
+    for (let i = 0; i < animatedNpcs.length; i++) {
+        const path = npcPaths[i];  // Get the path for the current pedestrian
+        const speed = 0.1;  // Speed at which the pedestrian moves along the path
+
+        const targetWaypoint = path[animatedNpcsState[i].targetWaypoint];
+
+        // Calculate direction to target
+        const directionToTarget = new THREE.Vector2(
+            targetWaypoint.x - animatedNpcsState[i].position.x,
+            targetWaypoint.z - animatedNpcsState[i].position.z
+        );
+
+        const distanceToTarget = directionToTarget.length();
+
+        // If we've reached the waypoint (within a small threshold)
+        if (distanceToTarget < 0.5) {  // Threshold is smaller for better accuracy
+            // Stop at the waypoint
+            animatedNpcsState[i].position.set(targetWaypoint.x, targetWaypoint.y, targetWaypoint.z);
+
+            // Rotate the pedestrian 90 or 180 degrees depending on the path
+            if (path.length > 2) {
+                // Rotate 90 degrees for counterclockwise loop
+                animatedNpcs[i].rotation.y -= Math.PI/2;
+            } else {
+                // Rotate 180 degrees for back-and-forth path
+                animatedNpcs[i].rotation.y += Math.PI;  // Rotate 180 degrees
+            }
+
+            // Move to next waypoint
+            animatedNpcsState[i].targetWaypoint = (animatedNpcsState[i].targetWaypoint + 1) % path.length;
+        } else {
+            // Move towards the target waypoint
+            const moveVector = directionToTarget.normalize().multiplyScalar(speed * deltaTime);
+            animatedNpcsState[i].position.add(moveVector);
+
+            // Update the actual pedestrian position in the scene
+            // Here, we apply the state position to the actual NPC model's position
+            animatedNpcs[i].position.set(animatedNpcsState[i].position.x, animatedNpcsState[i].position.y, animatedNpcsState[i].position.z);
+        }
+
+        // Optionally, play animations based on movement (walk, idle, etc.)
+        if (animatedNpcs[i].userData.mixer) {
+            animatedNpcs[i].userData.mixer.update(deltaTime);
+        }
+    }
+}
+*/
+
+// Camera control
 let isTopDownView = false; // Track if the camera is in top-down mode
 const cameraBoundingSize = new THREE.Vector3(2, 2, 2);
 const transitionSpeed = 0.05;
 
-
-
-
 function updateCamera() {
     if (!playerCar) return;
-
     // Define the fixed offset in the car's local space (Behind and Above)
     const offset = new THREE.Vector3(0, 2, -4); // (x, height, distance behind)
     const translationMatrix = new THREE.Matrix4().makeTranslation(offset.x, offset.y, offset.z);
     const desiredCameraMatrix = playerCar.matrixWorld.clone().multiply(translationMatrix);
     const desiredCameraPosition = new THREE.Vector3().setFromMatrixPosition(desiredCameraMatrix);
-
     // Create a virtual bounding box around the desired camera position
     const cameraBox = new THREE.Box3().setFromCenterAndSize(desiredCameraPosition, cameraBoundingSize);
-
     // Check for collisions with buildings and walls
     let isObstructed = false;
     for (const obj of buildings.concat(walls)) {
@@ -1278,35 +1410,28 @@ function updateCamera() {
             break; // Stop checking once we detect an obstruction
         }
     }
-
     if (isObstructed) {
         // Switch to top-down view if obstructed
         if (!isTopDownView) {
             isTopDownView = true;
         }
-
         // Align top-down view with the player's car direction
         const topDownOffset = new THREE.Vector3(0, 10, 0); // Move above the car
         const topDownPosition = playerCar.position.clone().add(topDownOffset);
-
         // Get the car's forward direction
         const carDirection = new THREE.Vector3();
         playerCar.getWorldDirection(carDirection);
         carDirection.setY(0); // Ignore vertical direction (we only care about horizontal rotation)
-
         // Adjust camera to look slightly ahead in the direction of the car
         const lookAtTarget = playerCar.position.clone().add(carDirection);
-
         // Smoothly move to top-down position
         camera.position.lerp(topDownPosition, transitionSpeed);
         camera.lookAt(lookAtTarget);
-
     } else {
         // If no obstruction, switch back to third-person view
         if (isTopDownView) {
             isTopDownView = false;
         }
-
         // Smooth transition back to third-person camera
         camera.position.lerp(desiredCameraPosition, transitionSpeed);
         camera.lookAt(playerCar.position);
@@ -1318,10 +1443,29 @@ let keys = {};
 document.addEventListener("keydown", (event) => keys[event.key.toLowerCase()] = true);
 document.addEventListener("keyup", (event) => keys[event.key.toLowerCase()] = false);
 
-let speed = 0;
-let maxSpeed = 0.18;
-let acceleration = 0.01;
-let turnSpeed = 0.03;
+
+// manually creating bounding boxes
+const npcBoundingSize = new THREE.Vector3(1, 2, 1);  // Set an appropriate size for the NPC
+
+// Function to create and track NPC bounding boxes
+function createNpcBoundingBox(npc) {
+    // Get the NPC's current position
+    const npcPosition = npc.position.clone();
+    
+    // Create a bounding box using the NPC's position and the predefined size
+    const npcBox = new THREE.Box3().setFromCenterAndSize(npcPosition, npcBoundingSize);
+    
+    // Optionally, you can visualize the bounding box as a wireframe
+    /*
+    const geometry = new THREE.BoxGeometry(npcBoundingSize.x, npcBoundingSize.y, npcBoundingSize.z);
+    const material = new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.5, transparent: true });
+    const wireframe = new THREE.LineSegments(new THREE.EdgesGeometry(geometry), material);
+    
+    wireframe.position.copy(npcPosition);  // Position the wireframe at the NPC's position
+    scene.add(wireframe);  // Add the wireframe to the scene (for visualization purposes)
+*/
+    return npcBox;  // Return the bounding box for collision detection
+}
 
 
 function createBoundingBoxHelper(box, color) {
@@ -1433,6 +1577,24 @@ function checkCollision() {
             return true;
         }
     }
+
+    const npcBoundingBoxes = npcs.concat(animatedNpcs).map(npc => createNpcBoundingBox(npc));
+    for (const npcBox of npcBoundingBoxes) {
+        const carBox = new THREE.Box3().setFromObject(playerCar);
+
+        if (carBox.intersectsBox(npcBox)) {
+            return true; 
+        }
+    }
+    /*
+    for (const npc of npcs.concat(animatedNpcs)) {
+        const carBox = new THREE.Box3().setFromObject(playerCar);
+        const npcBox = new THREE.Box3().setFromObject(npc);
+        console.log(npcBox.getSize(new THREE.Vector3()));
+        if (carBox.intersectsBox(npcBox)) {
+            return true;
+        }
+    } */
     const carBox = new THREE.Box3().setFromObject(playerCar);
     const stopSignBox = new THREE.Box3().setFromObject(stopSign);
     const stopSign2Box = new THREE.Box3().setFromObject(stopSign2);
@@ -1457,6 +1619,11 @@ function checkExitCollision() {
 }
 
 
+
+let speed = 0;
+let maxSpeed = 0.18;
+let acceleration = 0.01;
+let turnSpeed = 0.025;
 
 function updatePlayerCar(deltaTime) {
 
@@ -1565,8 +1732,15 @@ function animate() {
 
     if (playerCar) {
       updatePlayerCar(deltaTime);
-      updateCamera();
+      //updateCamera();
     }
+
+
+    //updatePedestrianMovement(deltaTime);  // Update pedestrian movement
+
+
+    // Update all animation mixers
+    mixers.forEach(mixer => mixer.update(deltaTime));
 
     // Update automated car
     updateAutoCar(deltaTime);
