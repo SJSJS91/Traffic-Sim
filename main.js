@@ -1323,96 +1323,202 @@ let maxSpeed = 0.18;
 let acceleration = 0.01;
 let turnSpeed = 0.03;
 
+// function checkCollision() {
+
+//     if (!gameReady) return false;
+
+
+//     let i = 0;
+//     for (const building of buildings.concat(walls)) {
+//         const carBox = new THREE.Box3().setFromObject(playerCar);
+//         const buildingBox = new THREE.Box3().setFromObject(building);
+//         const center = buildingBox.getCenter(new THREE.Vector3()); // Get the center
+//         const size = buildingBox.getSize(new THREE.Vector3()); // Get the original size
+
+//         if (i == 4 || i == 3) {
+//             const scaleFactor = new THREE.Vector3(0.84, 1, 0.74); // Example scale factors (x, y, z)
+
+//             // Scale the size components independently
+//             const newSize = size.multiply(scaleFactor);
+
+//             // Set new min and max, keeping the center the same
+//             buildingBox.set(
+//                 center.clone().sub(newSize.clone().multiplyScalar(0.5)), // New min
+//                 center.clone().add(newSize.clone().multiplyScalar(0.5))  // New max
+//             );
+//         }
+
+//         if (i == 9) {
+//             const scaleFactor = new THREE.Vector3(0.925, 1, 0.75); // Example scale factors (x, y, z)
+
+//             // Scale the size components independently
+//             const newSize = size.multiply(scaleFactor);
+
+//             // Set new min and max, keeping the center the same
+//             buildingBox.set(
+//                 center.clone().sub(newSize.clone().multiplyScalar(0.5)), // New min
+//                 center.clone().add(newSize.clone().multiplyScalar(0.5))  // New max
+//             );
+//         }
+
+//         if (i == 1 || i == 2) {
+//             const scaleFactor = new THREE.Vector3(0.84, 1, 0.8); // Example scale factors (x, y, z)
+
+//             // Scale the size components independently
+//             const newSize = size.multiply(scaleFactor);
+
+//             // Set new min and max, keeping the center the same
+//             buildingBox.set(
+//                 center.clone().sub(newSize.clone().multiplyScalar(0.5)), // New min
+//                 center.clone().add(newSize.clone().multiplyScalar(0.5))  // New max
+//             );
+//         }
+
+//         i++;
+//         if (carBox.intersectsBox(buildingBox)) {
+//             i = 0;
+//             return true;
+//         }
+        
+//     }
+
+//     i = 0;
+
+//     for (let light of trafficLights) {
+//         light.updateBoundingBox(); // Update bounding box before checking collision
+//         const carBox = new THREE.Box3().setFromObject(playerCar);
+//         if (carBox.intersectsBox(light.boundingBox)) {
+//             return true;
+//         }
+//     }
+//     const carBox = new THREE.Box3().setFromObject(playerCar);
+//     const stopSignBox = new THREE.Box3().setFromObject(stopSign);
+//     const stopSign2Box = new THREE.Box3().setFromObject(stopSign2);
+//     if (carBox.intersectsBox(stopSignBox) || carBox.intersectsBox(stopSign2Box)) {
+//         return true;
+//     }
+
+//     if (checkAutoCarCollision()) {
+//         return true;
+//     }
+
+//     return false;
+// }
+
 function checkCollision() {
 
     if (!gameReady) return false;
 
+    const carBox = new THREE.Box3().setFromObject(playerCar);
+    // console.log("🚗 Player Car Bounding Box:", carBox.min, carBox.max);
+    console.log("🚗 Player Car Box in checkCollision:", carBox.min, carBox.max);
+
 
     let i = 0;
     for (const building of buildings.concat(walls)) {
-        const carBox = new THREE.Box3().setFromObject(playerCar);
+        // if (i === 25 || i == 11) {
+        //     console.warn("⚠️ Skipping Building #25 for debugging.");
+        //     continue;
+        // }
+        
         const buildingBox = new THREE.Box3().setFromObject(building);
-        const center = buildingBox.getCenter(new THREE.Vector3()); // Get the center
-        const size = buildingBox.getSize(new THREE.Vector3()); // Get the original size
+        const center = buildingBox.getCenter(new THREE.Vector3()); 
+        const size = buildingBox.getSize(new THREE.Vector3()); 
 
+        // console.log(`🏢 Checking collision with Building #${i}`);
+        // console.log("   📏 Original Building Box:", buildingBox.min, buildingBox.max);
+
+        // Modify bounding box based on index
         if (i == 4 || i == 3) {
-            const scaleFactor = new THREE.Vector3(0.84, 1, 0.74); // Example scale factors (x, y, z)
-
-            // Scale the size components independently
+            const scaleFactor = new THREE.Vector3(0.84, 1, 0.74);
             const newSize = size.multiply(scaleFactor);
-
-            // Set new min and max, keeping the center the same
             buildingBox.set(
-                center.clone().sub(newSize.clone().multiplyScalar(0.5)), // New min
-                center.clone().add(newSize.clone().multiplyScalar(0.5))  // New max
+                center.clone().sub(newSize.clone().multiplyScalar(0.5)), 
+                center.clone().add(newSize.clone().multiplyScalar(0.5))
             );
         }
 
         if (i == 9) {
-            const scaleFactor = new THREE.Vector3(0.925, 1, 0.75); // Example scale factors (x, y, z)
-
-            // Scale the size components independently
+            const scaleFactor = new THREE.Vector3(0.925, 1, 0.75);
             const newSize = size.multiply(scaleFactor);
-
-            // Set new min and max, keeping the center the same
             buildingBox.set(
-                center.clone().sub(newSize.clone().multiplyScalar(0.5)), // New min
-                center.clone().add(newSize.clone().multiplyScalar(0.5))  // New max
+                center.clone().sub(newSize.clone().multiplyScalar(0.5)), 
+                center.clone().add(newSize.clone().multiplyScalar(0.5))
             );
         }
 
         if (i == 1 || i == 2) {
-            const scaleFactor = new THREE.Vector3(0.84, 1, 0.8); // Example scale factors (x, y, z)
-
-            // Scale the size components independently
+            const scaleFactor = new THREE.Vector3(0.84, 1, 0.8);
             const newSize = size.multiply(scaleFactor);
-
-            // Set new min and max, keeping the center the same
             buildingBox.set(
-                center.clone().sub(newSize.clone().multiplyScalar(0.5)), // New min
-                center.clone().add(newSize.clone().multiplyScalar(0.5))  // New max
+                center.clone().sub(newSize.clone().multiplyScalar(0.5)), 
+                center.clone().add(newSize.clone().multiplyScalar(0.5))
             );
         }
 
-        i++;
+        // console.log("   🔍 Adjusted Building Box:", buildingBox.min, buildingBox.max);
+
         if (carBox.intersectsBox(buildingBox)) {
-            i = 0;
+            // console.log(`💥 COLLISION DETECTED with Building #${i}`);
             return true;
         }
-        
+        i++;
     }
 
-    i = 0;
-
+    // Check collision with traffic lights
     for (let light of trafficLights) {
-        light.updateBoundingBox(); // Update bounding box before checking collision
-        const carBox = new THREE.Box3().setFromObject(playerCar);
+        light.updateBoundingBox();
         if (carBox.intersectsBox(light.boundingBox)) {
+            console.log("🚦 Collision with Traffic Light");
             return true;
         }
     }
-    const carBox = new THREE.Box3().setFromObject(playerCar);
+
+    // Check collision with stop signs
     const stopSignBox = new THREE.Box3().setFromObject(stopSign);
     const stopSign2Box = new THREE.Box3().setFromObject(stopSign2);
+    console.log("🛑 Checking Stop Signs:", stopSignBox.min, stopSignBox.max, stopSign2Box.min, stopSign2Box.max);
+
     if (carBox.intersectsBox(stopSignBox) || carBox.intersectsBox(stopSign2Box)) {
+        console.log("🚗 Hit a Stop Sign!");
         return true;
     }
 
+    // Check collision with automated cars
     if (checkAutoCarCollision()) {
+        console.log("🚗 Hit an Automated Car!");
         return true;
     }
 
+    console.log("✅ No Collisions Detected!");
     return false;
 }
 
+
 function checkExitCollision() {
-    const carBox = new THREE.Box3().setFromObject(playerCar);
-    if (tunnelData && tunnelData.bbox.intersectsBox(carBox)) {
-        return true;
-    } else {
+    if (!tunnelData || !tunnelData.bbox || !playerCar) {
+        console.warn("⚠️ Tunnel data or player car is missing.");
         return false;
     }
+
+    const carBox = new THREE.Box3().setFromObject(playerCar);
+    // const tunnelBox = new THREE.Box3().setFromObject(tunnelData.tunnel);
+    const tunnelBox = new THREE.Box3(
+        new THREE.Vector3(-0.5, -0.5, -0.5), // Min corner
+        new THREE.Vector3(0.5, 0.5, 0.5)    // Max corner
+    );
+
+    // console.log("🔍 Checking Exit Collision:");
+    // console.log("🚗 Player Car Box:", carBox.min, carBox.max);
+    // console.log("🚪 Tunnel Box:", tunnelBox.min, tunnelBox.max);
+
+    const intersects = carBox.intersectsBox(tunnelBox);
+    // console.log("🚗 Player Car Box in checkExitCollision:", carBox.min, carBox.max);
+    // console.log(intersects ? "✅ Player reached exit!" : "❌ No exit collision detected.");
+    
+    return intersects;
 }
+
 
 
 
@@ -1505,6 +1611,7 @@ function animate() {
     // console.log("animate is running");
     if (!gameStarted) return;
 
+    checkExitCollision();
 
     if(didPlayerWin){
         playerWins();
