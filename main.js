@@ -112,7 +112,7 @@ scene.add(skySphere);
          isDay = !isDay;
          skyMaterial.map = isDay ? dayTexture : nightTexture;
          skyMaterial.needsUpdate = true; // Ensure the material updates
-         didPlayerWin = true;
+         //didPlayerWin = true;
      }
      // Adjust lighting
      if (isDay) {
@@ -1235,12 +1235,12 @@ const npcModels = [
 
 // Example usage for multiple NPCs with different positions and scales
 const npcConfigs = [
-    { position: { x: 5, y: 0.2, z: 5 }, scale: 1, rotationY: 0 },
-    { position: { x: -10, y: 0.2, z: 10 }, scale: 0.4, rotationY: 0 },
-    { position: { x: 8, y: 1.25, z: -8 }, scale: 0.6, rotationY: Math.PI },
-    { position: { x: -12, y: 0.19, z: -6 }, scale: 0.01, rotationY: 0 },
-    { position: { x: 15, y: 0.2, z: 3 }, scale: 1, rotationY: 0 },
-    { position: { x: -7, y: 0.2, z: -15 }, scale: 1, rotationY: 0 }
+    { position: { x: 62, y: 0.2, z: 45 }, scale: 1, rotationY: -Math.PI / 2 },
+    { position: { x: -20, y: 0.2, z: 75 }, scale: 0.4, rotationY: Math.PI },
+    { position: { x: 10, y: 1.25, z: 75 }, scale: 0.6, rotationY: 0 },
+    { position: { x: 8, y: -0.01, z: -72 }, scale: 0.01, rotationY: -Math.PI / 2 },
+    { position: { x: 67, y: 0.2, z: -78 }, scale: 1, rotationY: 0 },
+    { position: { x: -17, y: 0.2, z: -72 }, scale: 1, rotationY: 0 }
 ];
 
 // Load different NPC models at different positions
@@ -1248,6 +1248,252 @@ npcConfigs.forEach((config, index) => {
     const modelPath = npcModels[index % npcModels.length]; // Cycle through models
     loadNPC(modelPath, config.position, config.scale, config.rotationY);
 });
+
+
+
+
+
+
+// animated pedestrians
+const animatedNpcs = [];
+const mixers = []; // store animation mixers
+const animatedNpcLoader = new GLTFLoader();
+
+// NPC state initialization with correct path definitions
+const npcPaths = [
+    // Pedestrian 1 Path (clockwise loop)
+    [
+        new THREE.Vector3(-75, 0.2, -45),  // Starting point
+        new THREE.Vector3(-20, 0.2, -45),  // Waypoint 1
+        new THREE.Vector3(-20, 0.2, -15),  // Waypoint 2
+        new THREE.Vector3(-75, 0.2, -15),  // Waypoint 3
+    ],
+    // Pedestrian 2 Path (clockwise loop)
+    [
+        new THREE.Vector3(-78, 1.1, 14),  // Starting point
+        new THREE.Vector3(-18, 1.1, 14),  // Waypoint 1
+        new THREE.Vector3(-18, 1.1, 47),  // Waypoint 2
+        new THREE.Vector3(-78, 1.1, 47),  // Waypoint 3
+    ],
+    // Pedestrian 3 Path (clockwise loop)
+    [
+        new THREE.Vector3(65, 0.2, -20),   // Starting point
+        new THREE.Vector3(65, 0.2, -49),   // Waypoint 1
+        new THREE.Vector3(90, 0.2, -49),   // Waypoint 2
+        new THREE.Vector3(90, 0.2, -11),   // Waypoint 3
+        new THREE.Vector3(65, 0.2, -11),   // Waypoint 4
+        new THREE.Vector3(65, 0.2, -49),   // Waypoint 5
+    ],
+    // Pedestrian 4 Path (back and forth)
+    [
+        new THREE.Vector3(20, 0.2, -25),  // Starting point
+        new THREE.Vector3(20, 0.2, -13),  // Waypoint 1
+        new THREE.Vector3(20, 0.2, -47),  // Waypoint 2
+        new THREE.Vector3(20, 0.2, -13),  // Waypoint 3
+        new THREE.Vector3(20, 0.2, -47),  // Waypoint 4
+    ],
+    // Pedestrian 5 Path (back and forth)
+    [
+        new THREE.Vector3(23, 0.2, 15),   // Starting point
+        new THREE.Vector3(23, 0.2, 47),   // Waypoint 1
+        new THREE.Vector3(23, 0.2, 13),   // Waypoint 2
+        new THREE.Vector3(23, 0.2, 47),   // Waypoint 3
+        new THREE.Vector3(23, 0.2, 13),   // Waypoint 4
+    ]
+];
+
+// NPC state initialization
+let animatedNpcsState = [];
+
+function loadAnimatedNpc(modelPath, position, scale, rotationY = 0, index_in) {
+    animatedNpcLoader.load(modelPath, function (gltf) {
+        const npc = gltf.scene;
+        npc.position.set(position.x, position.y, position.z);
+        npc.scale.set(scale, scale, scale);
+        npc.rotation.y = rotationY; // Apply initial rotation
+        
+        // Store the index directly in the npc userData for reliable reference
+        npc.userData.index = index_in;
+        
+        scene.add(npc);
+        animatedNpcs.push(npc); // Store in NPCs array
+
+        // Initialize the state for this NPC
+        const npcState = {
+            position: position.clone(),
+            currentWaypoint: 0,
+            targetWaypoint: 1,
+            isMovingForward: true, // For back-and-forth paths
+            pathType: index_in >= 3 ? 'backAndForth' : 'loop', // Determine path type based on index
+            index: index_in // Store the index in state as well for easy reference
+        };
+        animatedNpcsState.push(npcState);
+
+        // Setup animations
+        if (gltf.animations.length > 0) {
+            const mixer = new THREE.AnimationMixer(npc);
+            const action = mixer.clipAction(gltf.animations[0]); // Play walking animation
+            action.play();
+            mixers.push(mixer);
+            npc.userData.mixer = mixer;
+        } else {
+            console.warn("No animations found in model:", modelPath);
+        }
+    }, undefined, function (error) {
+        console.error("Error loading NPC model:", error);
+    });
+}
+
+// Load the NPCs with initial positioning
+loadAnimatedNpc('models/animated_npc1/scene.gltf', new THREE.Vector3(-75, 0.2, -45), 0.009, Math.PI/2, 0);
+loadAnimatedNpc('models/animated_npc2/scene.gltf', new THREE.Vector3(-78, 1.1, 14), 0.02, Math.PI/2, 1);
+loadAnimatedNpc('models/animated_npc3/scene.gltf', new THREE.Vector3(65, 0.2, -20), 0.95, Math.PI, 2);
+loadAnimatedNpc('models/animated_npc4/scene.gltf', new THREE.Vector3(20, 0.2, -25), 12, 0, 3);
+loadAnimatedNpc('models/animated_npc5/scene.gltf', new THREE.Vector3(23, 0.2, 25), 0.5, 0, 4);
+
+function updatePedestrianMovement(deltaTime) {
+    if (animatedNpcs.length === 0) return;  // Wait until NPCs are fully loaded
+
+    // Create a map to associate NPCs with their states and paths
+    // This prevents the need for nested loops
+    const npcMap = new Map();
+    
+    // First, sort the NPCs by their index
+    for (let i = 0; i < animatedNpcs.length; i++) {
+        const npc = animatedNpcs[i];
+        const index = npc.userData.index;
+        
+        // Check if this NPC has a valid index
+        if (index !== undefined) {
+            npcMap.set(index, {
+                npc: npc,
+                state: null,
+                path: null
+            });
+        }
+    }
+    
+    // Then, match states to NPCs
+    for (let i = 0; i < animatedNpcsState.length; i++) {
+        const state = animatedNpcsState[i];
+        const index = state.index;
+        
+        if (npcMap.has(index)) {
+            npcMap.get(index).state = state;
+        }
+    }
+    
+    // Assign paths to NPCs
+    for (let i = 0; i < npcPaths.length; i++) {
+        const path = npcPaths[i];
+        
+        if (npcMap.has(i)) {
+            npcMap.get(i).path = path;
+        }
+    }
+    
+    // Now process each NPC with its correct state and path
+    for (let i = 0; i < npcPaths.length; i++) {
+        // Skip if no NPC exists for this path
+        if (!npcMap.has(i)) continue;
+        
+        const { npc, state, path } = npcMap.get(i);
+        
+        // Skip if any required data is missing
+        if (!npc || !state || !path) continue;
+        
+        // Speed is now dependent on delta time for smoother animation
+        const speed = 2.0; // Units per second
+        const moveStep = speed * deltaTime;
+        
+        // Get current and target waypoints
+        const currentPos = state.position;
+        const targetPos = path[state.targetWaypoint];
+        
+        // Calculate direction vector to target
+        const directionVector = new THREE.Vector3(
+            targetPos.x - currentPos.x,
+            targetPos.y - currentPos.y,
+            targetPos.z - currentPos.z
+        );
+        
+        const distanceToTarget = directionVector.length();
+        
+        // If we've reached the waypoint (within a small threshold)
+        if (distanceToTarget < moveStep) {
+            // Move directly to the waypoint
+            state.position.copy(targetPos);
+            npc.position.copy(state.position);
+            
+            // Update waypoint targeting based on path type
+            if (state.pathType === 'loop') {
+                // For loop paths, simply move to the next waypoint in sequence
+                state.currentWaypoint = state.targetWaypoint;
+                state.targetWaypoint = (state.targetWaypoint + 1) % path.length;
+            } else if (state.pathType === 'backAndForth') {
+                // For back-and-forth paths, change direction at endpoints
+                state.currentWaypoint = state.targetWaypoint;
+                
+                if (state.isMovingForward) {
+                    if (state.targetWaypoint === path.length - 1) {
+                        state.isMovingForward = false;
+                        state.targetWaypoint--;
+                    } else {
+                        state.targetWaypoint++;
+                    }
+                } else {
+                    if (state.targetWaypoint === 0) {
+                        state.isMovingForward = true;
+                        state.targetWaypoint++;
+                    } else {
+                        state.targetWaypoint--;
+                    }
+                }
+            }
+            
+            // Calculate new facing direction
+            const newTargetPos = path[state.targetWaypoint];
+            const facingDir = new THREE.Vector3(
+                newTargetPos.x - state.position.x,
+                0,
+                newTargetPos.z - state.position.z
+            ).normalize();
+            
+            // Apply rotation to face the next waypoint
+            if (facingDir.length() > 0.001) {
+                const angle = Math.atan2(facingDir.x, facingDir.z);
+                npc.rotation.y = angle;
+            }
+        } else {
+            // Move towards the target waypoint
+            directionVector.normalize().multiplyScalar(moveStep);
+            state.position.add(directionVector);
+            npc.position.copy(state.position);
+            
+            // Update rotation to face movement direction
+            const facingDir = new THREE.Vector3(
+                directionVector.x,
+                0,
+                directionVector.z
+            ).normalize();
+            
+            if (facingDir.length() > 0.001) {
+                const angle = Math.atan2(facingDir.x, facingDir.z);
+                npc.rotation.y = angle;
+            }
+        }
+        
+        // Update animation mixer
+        if (npc.userData.mixer) {
+            npc.userData.mixer.update(deltaTime);
+        }
+    }
+}
+
+
+
+
+
 
 // Camera control
 
@@ -1330,6 +1576,23 @@ function createBoundingBoxHelper(box, color) {
     scene.add(helper);
     return helper;
   }
+
+
+// manually creating bounding boxes
+const npcBoundingSize = new THREE.Vector3(1, 2, 1);  // Set an appropriate size for the NPC
+
+// Function to create and track NPC bounding boxes
+function createNpcBoundingBox(npc) {
+    // Get the NPC's current position
+    const npcPosition = npc.position.clone();
+    
+    // Create a bounding box using the NPC's position and the predefined size
+    const npcBox = new THREE.Box3().setFromCenterAndSize(npcPosition, npcBoundingSize);
+    
+
+    return npcBox;  // Return the bounding box for collision detection
+}
+
 
 function checkCollision() {
 
@@ -1433,6 +1696,17 @@ function checkCollision() {
             return true;
         }
     }
+
+    const npcBoundingBoxes = npcs.concat(animatedNpcs).map(npc => createNpcBoundingBox(npc));
+    for (const npcBox of npcBoundingBoxes) {
+        const carBox = new THREE.Box3().setFromObject(playerCar);
+
+        if (carBox.intersectsBox(npcBox)) {
+            return true; 
+        }
+    }
+
+
     const carBox = new THREE.Box3().setFromObject(playerCar);
     const stopSignBox = new THREE.Box3().setFromObject(stopSign);
     const stopSign2Box = new THREE.Box3().setFromObject(stopSign2);
@@ -1574,6 +1848,8 @@ function animate() {
     updateAutoCar4(deltaTime);
     updateAutoCar5(deltaTime);
     updateAutoCar6(deltaTime);
+
+    updatePedestrianMovement(deltaTime);  // Update pedestrian movement
 
     updateTrafficLights(deltaTime);
     renderer.render(scene, camera);
